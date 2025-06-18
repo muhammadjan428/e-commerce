@@ -1,6 +1,7 @@
 'use server';
 
-import User from './user.model';
+import { auth } from '@clerk/nextjs/server';
+import User, { IUser } from '../models/user.model';
 import { connectToDatabase } from '@/lib/mongoose';
 
 interface UserData {
@@ -10,7 +11,10 @@ interface UserData {
   first_name: string | null;
   last_name: string | null;
   image?: string | null;
+  isAdmin?: boolean;
 }
+
+const ADMIN_EMAILS = ['mjan23925@gmail.com', 'admin@example.com'];
 
 export const getAllUsers = async () => {
   try {
@@ -26,7 +30,10 @@ export const getAllUsers = async () => {
 export const CreateUser = async (user: UserData) => {
   try {
     await connectToDatabase();
-    const newUser = await User.create(user);
+
+    const isAdmin = ADMIN_EMAILS.includes(user.email);
+    const newUser = await User.create({ ...user, isAdmin });
+
     return JSON.parse(JSON.stringify(newUser));
   } catch (error) {
     console.error('Database error while creating user:', error);
@@ -58,4 +65,25 @@ export const DeleteUser = async (clerkId: string) => {
     console.error('Database error while deleting user:', error);
     return new Response('Database error', { status: 500 });
   }
+};
+
+export const isAdmin = async (clerkId: string): Promise<boolean> => {
+  await connectToDatabase();
+  const user = await User.findOne({ clerkId });
+  return user?.isAdmin || false;
+};
+
+export const getCurrentUser = async (): Promise<IUser | null> => {
+  const { userId } = await auth();
+  if (!userId) return null;
+
+  await connectToDatabase();
+  const user = await User.findOne({ clerkId: userId }).lean<IUser>();
+
+  return user || null;
+};
+
+export const checkIsAdmin = async (): Promise<boolean> => {
+  const user = await getCurrentUser();
+  return user?.isAdmin === true;
 };

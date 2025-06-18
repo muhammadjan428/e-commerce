@@ -2,7 +2,7 @@ import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/mongoose';
-import { CreateUser, UpdateUser, DeleteUser } from '@/lib/users.actions';
+import { CreateUser, UpdateUser, DeleteUser } from '@/lib/actions/users.actions';
 
 export async function POST(req: Request) {
   const CLERK_WEBHOOK_SIGNING_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
@@ -56,6 +56,10 @@ export async function POST(req: Request) {
 
   await connectToDatabase();
 
+  // Define admin emails (or you can pull this from DB/env later)
+  const ADMIN_EMAILS = ['admin@example.com', 'you@example.com'];
+  const isAdmin = ADMIN_EMAILS.includes(email);
+
   if (eventType === 'user.created') {
     const user = {
       clerkId: id,
@@ -64,6 +68,7 @@ export async function POST(req: Request) {
       first_name: firstName,
       last_name: lastName,
       image,
+      isAdmin, // ✅ attach admin role
     };
     const createdUser = await CreateUser(user);
     return new Response(JSON.stringify(createdUser), { status: 201 });
