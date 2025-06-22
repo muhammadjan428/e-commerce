@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Package, Settings, ShoppingCart, Users, LayoutDashboard, X } from 'lucide-react'
+import { Menu, Package, Settings, ShoppingCart, Users, LayoutDashboard, X, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { UserButton } from '@clerk/nextjs'
@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 const navLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
-  { href: '/admin/categories', label: 'Categories', icon: ShoppingCart },
+  { href: '/admin/categories', label: 'Categories', icon: LayoutGrid },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/customers', label: 'Customers', icon: Users },
   { href: '/admin/settings', label: 'Settings', icon: Settings },

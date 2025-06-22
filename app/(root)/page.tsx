@@ -2,10 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { getAllProducts } from "@/lib/actions/product.actions";
 import { getAllCategories } from "@/lib/actions/category.actions";
-import DeleteButton from "@/components/shared/DeleteButton";
-import { Plus, Edit, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 
-export default async function ProductsPage({
+export default async function Products({
   searchParams,
 }: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -24,20 +23,11 @@ export default async function ProductsPage({
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Product Management
-          </h1>
-          <p className="text-gray-600 mt-1">Manage your product inventory</p>
-        </div>
-        <Link
-          href="/admin/products/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg transition flex items-center gap-2 shadow-md hover:shadow-lg self-start"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Create Product</span>
-        </Link>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
+        <p className="text-gray-600 mt-1">
+          Explore a variety of products and make your purchase today.
+        </p>
       </div>
 
       {/* Category Filter */}
@@ -47,7 +37,7 @@ export default async function ProductsPage({
         </h2>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/admin/products"
+            href="/"
             className={`px-4 py-2 rounded-full text-sm font-medium ${
               !category
                 ? "bg-blue-100 text-blue-800 border border-blue-200"
@@ -58,10 +48,10 @@ export default async function ProductsPage({
           </Link>
           {categories.map((cat) => (
             <Link
-              key={cat._id}
-              href={`/admin/products?category=${cat._id}`}
+              key={cat._id.toString()}
+              href={`/?category=${cat._id}`}
               className={`px-4 py-2 rounded-full text-sm font-medium ${
-                cat._id === category
+                cat._id.toString() === category
                   ? "bg-blue-100 text-blue-800 border border-blue-200"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
@@ -75,31 +65,21 @@ export default async function ProductsPage({
       {/* Products Grid */}
       {products.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-          <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-            <div className="bg-gray-300 border-2 border-dashed rounded-xl w-16 h-16" />
-          </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-2">
             No products found
           </h3>
           <p className="text-gray-600 max-w-md mx-auto mb-6">
             {category
-              ? "No products in this category."
-              : "Get started by creating a new product."}
+              ? "There are no products in this category yet."
+              : "We're working on adding products. Please check back soon."}
           </p>
-          <Link
-            href="/admin/products/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-flex items-center gap-2 transition"
-          >
-            <Plus className="w-5 h-5" />
-            Create Product
-          </Link>
         </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <div
               key={product._id}
-              className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
+              className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col"
             >
               <div className="relative aspect-square bg-gray-50">
                 {product.images && product.images.length > 0 ? (
@@ -122,30 +102,39 @@ export default async function ProductsPage({
                 )}
               </div>
 
-              <div className="p-5">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900 truncate">
-                      {product.name}
-                    </h2>
-                    <p className="text-xl font-semibold text-gray-900 mt-1">
-                      ${product.price.toFixed(2)}
-                    </p>
+              <div className="p-5 flex flex-col flex-grow justify-between">
+                <div>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-900 truncate">
+                        {product.name}
+                      </h2>
+                      <p className="text-xl font-semibold text-gray-900 mt-1">
+                        ${product.price.toFixed(2)}
+                      </p>
+                    </div>
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                      {product.category?.name || "Uncategorized"}
+                    </span>
                   </div>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                    {product.category?.name || "Uncategorized"}
-                  </span>
                 </div>
 
-                <div className="flex justify-between mt-6 pt-4 border-t border-gray-100">
+                {/* Bottom Buttons */}
+                <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
                   <Link
-                    href={`/admin/products/${product._id}/edit`}
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+                    href="/wishlist"
+                    className="text-gray-500 hover:text-red-500 transition"
+                    title="Add to Wishlist"
                   >
-                    <Edit className="w-4 h-4" />
-                    <span>Edit</span>
+                    <Heart className="w-6 h-6" />
                   </Link>
-                  <DeleteButton id={product._id} />
+
+                  <Link
+                    href={`/checkout?id=${product._id}`}
+                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
+                  >
+                    Add To Cart
+                  </Link>
                 </div>
               </div>
             </div>
@@ -162,9 +151,7 @@ export default async function ProductsPage({
           </span>
         ) : (
           <Link
-            href={`/admin/products?page=${page - 1}${
-              category ? `&category=${category}` : ""
-            }`}
+            href={`/?page=${page - 1}${category ? `&category=${category}` : ""}`}
             className="flex items-center gap-1 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -175,9 +162,7 @@ export default async function ProductsPage({
         <div className="flex gap-1">
           {page > 1 && (
             <Link
-              href={`/admin/products?page=${page - 1}${
-                category ? `&category=${category}` : ""
-              }`}
+              href={`/?page=${page - 1}${category ? `&category=${category}` : ""}`}
               className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
             >
               {page - 1}
@@ -188,9 +173,7 @@ export default async function ProductsPage({
           </span>
           {hasNextPage && (
             <Link
-              href={`/admin/products?page=${page + 1}${
-                category ? `&category=${category}` : ""
-              }`}
+              href={`/?page=${page + 1}${category ? `&category=${category}` : ""}`}
               className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
             >
               {page + 1}
@@ -205,9 +188,7 @@ export default async function ProductsPage({
           </span>
         ) : (
           <Link
-            href={`/admin/products?page=${page + 1}${
-              category ? `&category=${category}` : ""
-            }`}
+            href={`/?page=${page + 1}${category ? `&category=${category}` : ""}`}
             className="flex items-center gap-1 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
           >
             <span>Next</span>

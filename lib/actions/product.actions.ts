@@ -1,6 +1,6 @@
 'use server';
 
-import Product from '@/lib/models/product.model';
+import Product from '../models/product.model';
 import { connectToDatabase } from '@/lib/mongoose';
 // import { revalidatePath } from 'next/cache';
 
@@ -9,7 +9,8 @@ export type ProductType = {
   name: string;
   slug: string;
   price: number;
-  category: { _id: string; name: string } | null; // Allow null category
+  category: { _id: string; name: string } | null;
+  images?: string[]; // Add images to the type
   createdAt: string;
 };
 
@@ -36,19 +37,25 @@ export const getAllProducts = async (
     name: p.name,
     slug: p.slug,
     price: p.price,
+    images: p.images || [], // Include images
     category: p.category ? {
       _id: p.category._id?.toString() || '',
       name: p.category.name || '',
-    } : null, // Handle null/undefined category
+    } : null,
     createdAt: p.createdAt?.toISOString() || '',
   }));
 };
 
-// ✅ CREATE PRODUCT
+// ✅ CREATE PRODUCT - FIXED TO HANDLE IMAGES
 export const createProduct = async (formData: FormData) => {
   const name = formData.get('name') as string;
   const price = Number(formData.get('price'));
   const category = formData.get('category') as string;
+  
+  // ✅ FIXED: Get all image URLs from FormData
+  const images = formData.getAll('images') as string[];
+
+  console.log('Creating product with images:', images); // Debug log
 
   const slug = name.toLowerCase().replace(/\s+/g, '-');
 
@@ -57,21 +64,45 @@ export const createProduct = async (formData: FormData) => {
   const existing = await Product.findOne({ slug });
   if (existing) throw new Error('Product already exists');
 
-  await Product.create({ name, slug, price, category });
+  // ✅ FIXED: Include images in the creation
+  const newProduct = await Product.create({ 
+    name, 
+    slug, 
+    price, 
+    category, 
+    images // Add images array
+  });
+
+  console.log('Product created with images:', newProduct.images); // Debug log
 
   // revalidatePath('/admin/products');
 };
 
-// ✅ UPDATE PRODUCT
+// ✅ UPDATE PRODUCT - FIXED TO HANDLE IMAGES
 export const updateProduct = async (_id: string, formData: FormData) => {
   const name = formData.get('name') as string;
   const price = Number(formData.get('price'));
   const category = formData.get('category') as string;
+  
+  // ✅ FIXED: Get all image URLs from FormData
+  const images = formData.getAll('images') as string[];
+
+  console.log('Updating product with images:', images); // Debug log
 
   const slug = name.toLowerCase().replace(/\s+/g, '-');
 
   await connectToDatabase();
-  await Product.findByIdAndUpdate(_id, { name, slug, price, category });
+  
+  // ✅ FIXED: Include images in the update
+  const updatedProduct = await Product.findByIdAndUpdate(_id, { 
+    name, 
+    slug, 
+    price, 
+    category, 
+    images // Add images array
+  });
+
+  console.log('Product updated with images:', updatedProduct?.images); // Debug log
 
   // revalidatePath('/admin/products');
 };
@@ -81,4 +112,27 @@ export const deleteProduct = async (_id: string) => {
   await connectToDatabase();
   await Product.findByIdAndDelete(_id);
   // revalidatePath('/admin/products');
+};
+
+export const getProductById = async (id: string) => {
+  try {
+    await connectToDatabase();
+
+    const product = await Product.findById(id).populate('category');
+
+    if (!product) return undefined;
+
+    return {
+      _id: product._id.toString(),
+      name: product.name,
+      price: product.price,
+      images: product.images || [], // Include images
+      category: {
+        _id: product.category?._id?.toString() || '',
+      },
+    };
+  } catch (error) {
+    console.error('Error in getProductById:', error);
+    throw new Error('Failed to fetch product by ID');
+  }
 };

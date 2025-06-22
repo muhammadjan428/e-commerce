@@ -1,7 +1,7 @@
 import { type Metadata } from 'next'
 import {ClerkProvider,} from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
+import '../globals.css'
 import Navbar from '@/components/shared/Navbar'
 import { CartProvider } from '@/components/cart/context'
 
@@ -26,10 +26,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
       <html lang="en">
-     <body>{children}</body>
+      <CartProvider>
+      <body>
+        <Navbar />
+        {children}
+        </body>
+    </CartProvider>
       </html>
-    </ClerkProvider>
   )
 }
