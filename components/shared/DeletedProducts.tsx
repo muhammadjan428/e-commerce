@@ -4,7 +4,7 @@ import { getAllProducts } from "@/lib/actions/product.actions";
 import { getAllCategories } from "@/lib/actions/category.actions";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default async function Products({
+export default async function Pro({
   searchParams,
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };

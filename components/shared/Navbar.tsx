@@ -12,24 +12,59 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCart } from '../cart/context';
+import { getCartItemsCount } from '@/lib/actions/cart.actions';
 import { UserButton, SignInButton, useAuth } from '@clerk/nextjs';
-import { Button } from '@/components/ui/button'; // 👈 Using shadcn button
+import { Button } from '@/components/ui/button';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  const { cartItems } = useCart();
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const { isSignedIn } = useAuth();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // fetch cart count
+  const fetchCartCount = async () => {
+    try {
+      setIsLoading(true);
+      const count = await getCartItemsCount();
+      setCartCount(count);
+    } catch (error) {
+      console.error('Failed to fetch cart count:', error);
+      setCartCount(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch count on mount and when user signs in/out
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    if (isSignedIn) fetchCartCount();
+  }, [isSignedIn]);
+
+  // Update when path changes
+  useEffect(() => {
+    if (isSignedIn) fetchCartCount();
+  }, [pathname, isSignedIn]);
+
+  // Scroll shadow effect
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Listen to cart updates via custom event
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      if (isSignedIn) fetchCartCount();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+  }, [isSignedIn]);
 
   return (
     <header
@@ -41,8 +76,8 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          {/* LOGO WITHOUT CART COUNT */}
+          <Link href="/" className="flex items-center gap-2 relative">
             <motion.div
               className="bg-gradient-to-r from-blue-600 to-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center"
               whileHover={{ rotate: 15 }}
@@ -55,7 +90,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Search */}
+          {/* SEARCH BAR */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <div className="relative w-full">
               <input
@@ -67,26 +102,28 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Actions */}
+          {/* ACTION ICONS */}
           <div className="flex items-center gap-4">
-            <Link href="/wishlist" className="hidden md:block p-2 rounded-full hover:bg-gray-50 relative">
+            {/* Wishlist */}
+            <Link href="/wishlist" className="hidden md:block p-2 rounded-full hover:bg-gray-50">
               <Heart className="text-gray-700" size={20} />
             </Link>
 
-            <Link href="/cart" className="p-2 rounded-full hover:bg-gray-50 relative">
+            {/* Cart */}
+            <Link href="/cart" className="relative p-2 rounded-full hover:bg-gray-50">
               <ShoppingCart className="text-gray-700" size={20} />
-              {cartCount > 0 && (
+              {!isLoading && cartCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                  className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
                 >
-                  {cartCount}
+                  {cartCount > 99 ? '99+' : cartCount}
                 </motion.span>
               )}
             </Link>
 
-            {/* Clerk Auth Desktop */}
+            {/* Clerk Auth */}
             <div className="hidden md:block">
               {isSignedIn ? (
                 <div className="scale-90">
@@ -99,7 +136,7 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile Toggle */}
             <Button
               variant="ghost"
               size="icon"
@@ -117,7 +154,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Nav */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div

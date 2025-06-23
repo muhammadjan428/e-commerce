@@ -8,6 +8,8 @@ export interface IUser extends Document {
   last_name: string;
   image?: string;
   isAdmin?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -18,7 +20,9 @@ const UserSchema = new Schema<IUser>({
   last_name: { type: String, required: true },
   image: String,
   isAdmin: { type: Boolean, default: false },
-}, { timestamps: true });
+}, { 
+  timestamps: true // This automatically adds createdAt and updatedAt
+});
 
 const User = models.User || model<IUser>('User', UserSchema);
 export default User;

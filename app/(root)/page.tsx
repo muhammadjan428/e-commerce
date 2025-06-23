@@ -2,7 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { getAllProducts } from "@/lib/actions/product.actions";
 import { getAllCategories } from "@/lib/actions/category.actions";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { getWishlistItems } from "@/lib/actions/wishlist.actions";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import AddToCartButton from "@/components/AddToCartButton";
+import WishlistButton from "@/components/WishlistButton";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function Products({
   searchParams,
@@ -14,10 +18,18 @@ export default async function Products({
   const category =
     typeof resolvedSearchParams?.category === "string" ? resolvedSearchParams.category : "";
 
-  const [products, categories] = await Promise.all([
+  const { userId } = await auth();
+
+  const [products, categories, wishlistItems] = await Promise.all([
     getAllProducts(page, 6, category),
     getAllCategories(),
+    userId ? getWishlistItems() : [],
   ]);
+
+  // Create a Set of wishlist product IDs for quick lookup
+  const wishlistProductIds = new Set(
+    wishlistItems.map(item => item.product._id)
+  );
 
   const hasNextPage = products.length === 6;
 
@@ -121,20 +133,12 @@ export default async function Products({
 
                 {/* Bottom Buttons */}
                 <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
-                  <Link
-                    href="/wishlist"
-                    className="text-gray-500 hover:text-red-500 transition"
-                    title="Add to Wishlist"
-                  >
-                    <Heart className="w-6 h-6" />
-                  </Link>
+                  <WishlistButton
+                    productId={product._id}
+                    isInWishlist={wishlistProductIds.has(product._id)}
+                  />
 
-                  <Link
-                    href={`/checkout?id=${product._id}`}
-                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
-                  >
-                    Add To Cart
-                  </Link>
+                  <AddToCartButton productId={product._id} />
                 </div>
               </div>
             </div>
