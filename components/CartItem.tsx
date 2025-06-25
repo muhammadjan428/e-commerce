@@ -24,6 +24,7 @@ export default function CartItem({ item, onUpdate }: CartItemProps) {
         quantity: newQuantity,
       });
       onUpdate?.();
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error updating quantity:', error);
     } finally {
@@ -36,6 +37,7 @@ export default function CartItem({ item, onUpdate }: CartItemProps) {
     try {
       await removeFromCart(item._id);
       onUpdate?.();
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error removing item:', error);
     } finally {

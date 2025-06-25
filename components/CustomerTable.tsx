@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { CustomerData } from '@/lib/actions/customer.actions';
 import Image from 'next/image';
-// import { formatDistance } from 'date-fns';
+import { formatDistance } from 'date-fns';
 
 interface Props {
   customers: CustomerData[];
@@ -38,10 +38,10 @@ export default function CustomersTable({ customers }: Props) {
     }
   });
 
-//   const formatDate = (date: Date | null) => {
-//     if (!date) return 'Never';
-//     return formatDistance(new Date(date), new Date(), { addSuffix: true });
-//   };
+  const formatDate = (date: Date | null) => {
+    if (!date) return 'Never';
+    return formatDistance(new Date(date), new Date(), { addSuffix: true });
+  };
 
   return (
     <div className="p-6">
@@ -132,10 +132,10 @@ export default function CustomersTable({ customers }: Props) {
                     </span>
                   </td>
                   <td className="py-4 px-4 text-gray-600">
-                    {/* {formatDate(customer.lastOrderDate)} */}
+                    {formatDate(customer.lastOrderDate)}
                   </td>
                   <td className="py-4 px-4 text-gray-600">
-                    {/* {formatDate(customer.createdAt)} */}
+                    {formatDate(customer.createdAt)}
                   </td>
                 </tr>
               ))}

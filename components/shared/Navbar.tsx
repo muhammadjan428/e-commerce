@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   ShoppingCart,
+  MessageCircle,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -66,6 +67,15 @@ export default function Navbar() {
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, [isSignedIn]);
 
+  // Smooth scroll to footer
+  const scrollToFooter = () => {
+    const footer = document.getElementById('footer');
+    if (footer) {
+      footer.scrollIntoView({ behavior: 'smooth' });
+    }
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
@@ -76,7 +86,7 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* LOGO WITHOUT CART COUNT */}
+          {/* LOGO */}
           <Link href="/" className="flex items-center gap-2 relative">
             <motion.div
               className="bg-gradient-to-r from-blue-600 to-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center"
@@ -104,6 +114,15 @@ export default function Navbar() {
 
           {/* ACTION ICONS */}
           <div className="flex items-center gap-4">
+            {/* Contact */}
+            <button
+              onClick={scrollToFooter}
+              className="hidden md:flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <MessageCircle size={16} />
+              <span>Contact</span>
+            </button>
+
             {/* Wishlist */}
             <Link href="/wishlist" className="hidden md:block p-2 rounded-full hover:bg-gray-50">
               <Heart className="text-gray-700" size={20} />
@@ -176,6 +195,14 @@ export default function Navbar() {
             </div>
 
             <nav className="flex flex-col border-t border-gray-100">
+              <button
+                onClick={scrollToFooter}
+                className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 hover:bg-gray-50 text-left"
+              >
+                <MessageCircle className="w-5 h-5 text-gray-400" />
+                <span>Contact Us</span>
+              </button>
+
               <Link
                 href="/wishlist"
                 className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 hover:bg-gray-50"
