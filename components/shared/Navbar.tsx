@@ -10,10 +10,12 @@ import {
   X,
   ShoppingCart,
   MessageCircle,
+  Package,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCartItemsCount } from '@/lib/actions/cart.actions';
+import { getUserPurchasesCount } from '@/lib/actions/purchase.actions';
 import { UserButton, SignInButton, useAuth } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 
@@ -24,6 +26,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [purchasesCount, setPurchasesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   // fetch cart count
@@ -40,14 +43,34 @@ export default function Navbar() {
     }
   };
 
+  // fetch purchases count
+  const fetchPurchasesCount = async () => {
+    try {
+      const count = await getUserPurchasesCount();
+      setPurchasesCount(count);
+    } catch (error) {
+      console.error('Failed to fetch purchases count:', error);
+      setPurchasesCount(0);
+    }
+  };
+
   // Fetch count on mount and when user signs in/out
   useEffect(() => {
-    if (isSignedIn) fetchCartCount();
+    if (isSignedIn) {
+      fetchCartCount();
+      fetchPurchasesCount();
+    } else {
+      setCartCount(0);
+      setPurchasesCount(0);
+    }
   }, [isSignedIn]);
 
   // Update when path changes
   useEffect(() => {
-    if (isSignedIn) fetchCartCount();
+    if (isSignedIn) {
+      fetchCartCount();
+      fetchPurchasesCount();
+    }
   }, [pathname, isSignedIn]);
 
   // Scroll shadow effect
@@ -63,8 +86,17 @@ export default function Navbar() {
       if (isSignedIn) fetchCartCount();
     };
 
+    const handlePurchaseUpdate = () => {
+      if (isSignedIn) fetchPurchasesCount();
+    };
+
     window.addEventListener('cartUpdated', handleCartUpdate);
-    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+    window.addEventListener('purchaseUpdated', handlePurchaseUpdate);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+      window.removeEventListener('purchaseUpdated', handlePurchaseUpdate);
+    };
   }, [isSignedIn]);
 
   // Smooth scroll to footer
@@ -122,6 +154,26 @@ export default function Navbar() {
               <MessageCircle size={16} />
               <span>Contact</span>
             </button>
+
+            {/* Purchases - Only show if signed in */}
+            {isSignedIn && (
+              <Link 
+                href="/purchases" 
+                className="hidden md:flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors relative"
+              >
+                <Package size={16} />
+                <span>Purchases</span>
+                {purchasesCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                  >
+                    {purchasesCount > 99 ? '99+' : purchasesCount}
+                  </motion.span>
+                )}
+              </Link>
+            )}
 
             {/* Wishlist */}
             <Link href="/wishlist" className="hidden md:block p-2 rounded-full hover:bg-gray-50">
@@ -202,6 +254,23 @@ export default function Navbar() {
                 <MessageCircle className="w-5 h-5 text-gray-400" />
                 <span>Contact Us</span>
               </button>
+
+              {/* Purchases - Only show if signed in */}
+              {isSignedIn && (
+                <Link
+                  href="/purchases"
+                  className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 hover:bg-gray-50 relative"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Package className="w-5 h-5 text-gray-400" />
+                  <span>My Purchases</span>
+                  {purchasesCount > 0 && (
+                    <span className="ml-auto bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {purchasesCount > 99 ? '99+' : purchasesCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               <Link
                 href="/wishlist"

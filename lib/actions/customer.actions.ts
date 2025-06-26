@@ -5,6 +5,64 @@ import { Payment } from '../models/payment.model';
 import User, { IUser } from '../models/user.model';
 import { checkIsAdmin } from './users.actions';
 
+export interface DailyRevenueData {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+// Add this function to your existing customer.actions.ts file
+export async function getDailyRevenue(): Promise<DailyRevenueData[]> {
+  try {
+    // Check if current user is admin
+    const isAdminUser = await checkIsAdmin();
+    if (!isAdminUser) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    await connectToDatabase();
+
+    // Get daily revenue and order count from payments
+    const dailyStats = await Payment.aggregate([
+      {
+        $addFields: {
+          // Convert createdAt to date string (YYYY-MM-DD format)
+          dateOnly: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt"
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$dateOnly",
+          revenue: { $sum: "$amount" },
+          orders: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          revenue: 1,
+          orders: 1
+        }
+      },
+      {
+        $sort: { date: 1 }
+      }
+    ]);
+
+    return dailyStats;
+
+  } catch (error) {
+    console.error('Error fetching daily revenue:', error);
+    return [];
+  }
+}
+
 export interface CustomerData {
   _id: string;
   clerkId: string;

@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { getSettings, updateSettings, resetSettings, toggleMaintenanceMode, SettingsType } from '@/lib/actions/settings.actions';
+import { getSettings, updateSettings, resetSettings, SettingsType } from '@/lib/actions/settings.actions';
 
 const AdminSettingsPage = () => {
   const [settings, setSettings] = useState<SettingsType | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('business');
 
   useEffect(() => {
     fetchSettings();
@@ -56,20 +56,6 @@ const AdminSettingsPage = () => {
       console.error('Error resetting settings:', error);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleMaintenanceToggle = async () => {
-    if (!settings) return;
-
-    try {
-      const newMode = !settings.maintenanceMode;
-      await toggleMaintenanceMode(newMode);
-      setSettings(prev => prev ? { ...prev, maintenanceMode: newMode } : null);
-      toast.success(`Maintenance mode ${newMode ? 'enabled' : 'disabled'}`);
-    } catch (error) {
-      toast.error('Failed to toggle maintenance mode');
-      console.error('Error toggling maintenance mode:', error);
     }
   };
 
@@ -139,7 +125,6 @@ const AdminSettingsPage = () => {
   }
 
   const tabs = [
-    { id: 'general', name: 'General', icon: '⚙️' },
     { id: 'business', name: 'Business', icon: '💼' },
     { id: 'contact', name: 'Contact', icon: '📞' },
     { id: 'social', name: 'Social Media', icon: '🌐' },
@@ -154,27 +139,6 @@ const AdminSettingsPage = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
           <p className="text-gray-600">Manage your store configuration and preferences</p>
         </div>
-
-        {/* Maintenance Mode Alert */}
-        {settings.maintenanceMode && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="text-red-500 mr-3">🚧</div>
-                <div>
-                  <h3 className="text-red-800 font-medium">Maintenance Mode Active</h3>
-                  <p className="text-red-600 text-sm">Your store is currently in maintenance mode</p>
-                </div>
-              </div>
-              <button
-                onClick={handleMaintenanceToggle}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Disable
-              </button>
-            </div>
-          </div>
-        )}
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Tabs */}
@@ -198,125 +162,6 @@ const AdminSettingsPage = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="p-6">
-            {/* General Tab */}
-            {activeTab === 'general' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">General Settings</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Site Name
-                    </label>
-                    <input
-                      type="text"
-                      value={getStringValue(settings.siteName, 'My E-commerce Store')}
-                      onChange={(e) => updateField('siteName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Currency
-                    </label>
-                    <select
-                      value={getStringValue(settings.currency, 'USD')}
-                      onChange={(e) => updateField('currency', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="USD">USD - US Dollar</option>
-                      <option value="EUR">EUR - Euro</option>
-                      <option value="GBP">GBP - British Pound</option>
-                      <option value="JPY">JPY - Japanese Yen</option>
-                      <option value="CAD">CAD - Canadian Dollar</option>
-                      <option value="AUD">AUD - Australian Dollar</option>
-                      <option value="CHF">CHF - Swiss Franc</option>
-                      <option value="CNY">CNY - Chinese Yuan</option>
-                      <option value="INR">INR - Indian Rupee</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Site Description
-                  </label>
-                  <textarea
-                    value={getStringValue(settings.siteDescription, 'Your one-stop shop for amazing products')}
-                    onChange={(e) => updateField('siteDescription', e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Currency Symbol
-                    </label>
-                    <input
-                      type="text"
-                      value={getStringValue(settings.currencySymbol, '$')}
-                      onChange={(e) => updateField('currencySymbol', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Cart Items
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="1000"
-                      value={getNumericValue(settings.maxCartItems, 50)}
-                      onChange={(e) => updateField('maxCartItems', parseInt(e.target.value) || 50)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="guestCheckout"
-                      checked={Boolean(settings.allowGuestCheckout)}
-                      onChange={(e) => updateField('allowGuestCheckout', e.target.checked)}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="guestCheckout" className="ml-2 text-sm text-gray-700">
-                      Allow guest checkout
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <h3 className="font-medium text-gray-900">Maintenance Mode</h3>
-                      <p className="text-sm text-gray-600">Temporarily disable your store for maintenance</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleMaintenanceToggle}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        settings.maintenanceMode
-                          ? 'bg-red-600 text-white hover:bg-red-700'
-                          : 'bg-green-600 text-white hover:bg-green-700'
-                      }`}
-                    >
-                      {settings.maintenanceMode ? 'Disable' : 'Enable'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Business Tab */}
             {activeTab === 'business' && (
               <div className="space-y-6">
@@ -341,7 +186,7 @@ const AdminSettingsPage = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Shipping Rate ({getStringValue(settings.currencySymbol, '$')})
+                      Shipping Rate
                     </label>
                     <input
                       type="number"
@@ -356,7 +201,7 @@ const AdminSettingsPage = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Free Shipping Threshold ({getStringValue(settings.currencySymbol, '$')})
+                      Free Shipping Threshold
                     </label>
                     <input
                       type="number"
@@ -374,8 +219,8 @@ const AdminSettingsPage = () => {
                   <h3 className="font-medium text-blue-900 mb-2">Preview</h3>
                   <div className="text-sm text-blue-800 space-y-1">
                     <p>Tax Rate: {getNumericValue(settings.taxRate, 8.5)}%</p>
-                    <p>Shipping: {getStringValue(settings.currencySymbol, '$')}{getNumericValue(settings.shippingRate, 5.99)}</p>
-                    <p>Free shipping on orders over: {getStringValue(settings.currencySymbol, '$')}{getNumericValue(settings.freeShippingThreshold, 50)}</p>
+                    <p>Shipping: {getNumericValue(settings.shippingRate, 5.99)}</p>
+                    <p>Free shipping on orders over: {getNumericValue(settings.freeShippingThreshold, 50)}</p>
                   </div>
                 </div>
               </div>

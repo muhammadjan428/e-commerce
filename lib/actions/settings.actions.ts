@@ -8,15 +8,10 @@ import { revalidatePath } from 'next/cache';
 
 export interface SettingsType {
   _id: string;
-  siteName: string;
-  siteDescription: string;
-  currency: string;
-  currencySymbol: string;
   taxRate: number;
   shippingRate: number;
   freeShippingThreshold: number;
   maintenanceMode: boolean;
-  allowGuestCheckout: boolean;
   maxCartItems: number;
   contactEmail: string;
   contactPhone: string;
@@ -48,15 +43,10 @@ export const getSettings = async (): Promise<SettingsType | null> => {
       // Return default settings if none exist
       return {
         _id: '',
-        siteName: 'My E-commerce Store',
-        siteDescription: 'Your one-stop shop for amazing products',
-        currency: 'USD',
-        currencySymbol: '$',
         taxRate: 8.5,
         shippingRate: 5.99,
         freeShippingThreshold: 50,
         maintenanceMode: false,
-        allowGuestCheckout: true,
         maxCartItems: 50,
         contactEmail: 'contact@store.com',
         contactPhone: '+1-234-567-8900',
@@ -73,15 +63,10 @@ export const getSettings = async (): Promise<SettingsType | null> => {
 
     return {
       _id: settings._id.toString(),
-      siteName: settings.siteName,
-      siteDescription: settings.siteDescription,
-      currency: settings.currency,
-      currencySymbol: settings.currencySymbol,
       taxRate: settings.taxRate,
       shippingRate: settings.shippingRate,
       freeShippingThreshold: settings.freeShippingThreshold,
       maintenanceMode: settings.maintenanceMode,
-      allowGuestCheckout: settings.allowGuestCheckout,
       maxCartItems: settings.maxCartItems,
       contactEmail: settings.contactEmail,
       contactPhone: settings.contactPhone,
@@ -155,20 +140,14 @@ export const getPublicSettings = async () => {
       await connectToDatabase();
   
       const settings = await Settings.findOne().select(
-        'siteName siteDescription currency currencySymbol taxRate shippingRate freeShippingThreshold maintenanceMode allowGuestCheckout maxCartItems contactEmail contactPhone socialMedia'
+        'taxRate shippingRate freeShippingThresholdy contactEmail contactPhone socialMedia'
       ).lean() as any;
   
       if (!settings) {
         return {
-          siteName: 'My E-commerce Store',
-          siteDescription: 'Your one-stop shop for amazing products',
-          currency: 'USD',
-          currencySymbol: '$',
           taxRate: 8.5,
           shippingRate: 5.99,
           freeShippingThreshold: 50,
-          maintenanceMode: false,
-          allowGuestCheckout: true,
           maxCartItems: 50,
           contactEmail: 'contact@store.com',
           contactPhone: '+1-234-567-8900',
@@ -177,15 +156,9 @@ export const getPublicSettings = async () => {
       }
   
       return {
-        siteName: settings.siteName,
-        siteDescription: settings.siteDescription,
-        currency: settings.currency,
-        currencySymbol: settings.currencySymbol,
         taxRate: settings.taxRate,
         shippingRate: settings.shippingRate,
         freeShippingThreshold: settings.freeShippingThreshold,
-        maintenanceMode: settings.maintenanceMode,
-        allowGuestCheckout: settings.allowGuestCheckout,
         maxCartItems: settings.maxCartItems,
         contactEmail: settings.contactEmail,
         contactPhone: settings.contactPhone,
@@ -215,19 +188,18 @@ export const resetSettings = async () => {
     await connectToDatabase();
 
     const defaultSettings = {
-      siteName: 'My E-commerce Store',
-      siteDescription: 'Your one-stop shop for amazing products',
-      currency: 'USD',
-      currencySymbol: '$',
       taxRate: 8.5,
       shippingRate: 5.99,
       freeShippingThreshold: 50,
-      maintenanceMode: false,
-      allowGuestCheckout: true,
       maxCartItems: 50,
-      contactEmail: 'contact@store.com',
-      contactPhone: '+1-234-567-8900',
-      socialMedia: {},
+      contactEmail: 'muhammadjanfullstack@gmail.com',
+      contactPhone: '+92-348-096-7184',
+      socialMedia: {
+        facebook: 'https://www.facebook.com/syedmuhammad.jan.79',
+        twitter: 'https://x.com/Muhammad_Jan11',
+        instagram: 'https://www.instagram.com/syedmuhammadjan/',
+        linkedin: 'https://www.linkedin.com/in/muhammad-jan-b247092a0/'
+      },
       emailSettings: {
         orderConfirmation: true,
         shippingUpdates: true,
@@ -251,40 +223,5 @@ export const resetSettings = async () => {
   } catch (error) {
     console.error('Error resetting settings:', error);
     throw new Error('Failed to reset settings');
-  }
-};
-
-// Toggle maintenance mode (Admin only)
-export const toggleMaintenanceMode = async (enabled: boolean) => {
-  try {
-    const { userId } = await auth();
-    
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
-    const isAdminUser = await checkIsAdmin();
-    if (!isAdminUser) {
-      throw new Error('Unauthorized: Admin access required');
-    }
-
-    await connectToDatabase();
-
-    await Settings.findOneAndUpdate(
-      {},
-      { $set: { maintenanceMode: enabled } },
-      { upsert: true }
-    );
-
-    revalidatePath('/admin/settings');
-    revalidatePath('/');
-
-    return {
-      success: true,
-      message: `Maintenance mode ${enabled ? 'enabled' : 'disabled'} successfully`
-    };
-  } catch (error) {
-    console.error('Error toggling maintenance mode:', error);
-    throw new Error('Failed to toggle maintenance mode');
   }
 };

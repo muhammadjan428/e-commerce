@@ -1,16 +1,9 @@
 import mongoose, { Schema, Document, models } from 'mongoose';
 
 export interface ISettings extends Document {
-  siteName: string;
-  siteDescription: string;
-  currency: string;
-  currencySymbol: string;
   taxRate: number;
   shippingRate: number;
   freeShippingThreshold: number;
-  maintenanceMode: boolean;
-  allowGuestCheckout: boolean;
-  maxCartItems: number;
   contactEmail: string;
   contactPhone: string;
   socialMedia: {
@@ -30,30 +23,7 @@ export interface ISettings extends Document {
 
 const SettingsSchema = new Schema<ISettings>(
   {
-    siteName: {
-      type: String,
-      required: true,
-      trim: true,
-      default: 'My E-commerce Store',
-    },
-    siteDescription: {
-      type: String,
-      required: true,
-      trim: true,
-      default: 'Your one-stop shop for amazing products',
-    },
-    currency: {
-      type: String,
-      required: true,
-      uppercase: true,
-      default: 'USD',
-      enum: ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'INR'],
-    },
-    currencySymbol: {
-      type: String,
-      required: true,
-      default: '$',
-    },
+
     taxRate: {
       type: Number,
       required: true,
@@ -72,22 +42,7 @@ const SettingsSchema = new Schema<ISettings>(
       required: true,
       min: 0,
       default: 50,
-    },
-    maintenanceMode: {
-      type: Boolean,
-      default: false,
-    },
-    allowGuestCheckout: {
-      type: Boolean,
-      default: true,
-    },
-    maxCartItems: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 1000,
-      default: 50,
-    },
+    }, 
     contactEmail: {
       type: String,
       required: true,
@@ -163,8 +118,5 @@ const SettingsSchema = new Schema<ISettings>(
     timestamps: true,
   }
 );
-
-// Create a compound index to ensure only one settings document
-SettingsSchema.index({ _id: 1 }, { unique: true });
 
 export const Settings = models.Settings || mongoose.model<ISettings>('Settings', SettingsSchema);

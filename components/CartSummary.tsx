@@ -13,7 +13,6 @@ interface CartSummaryProps {
 }
 
 interface PublicSettings {
-  currencySymbol: string;
   taxRate: number;
   shippingRate: number;
   freeShippingThreshold: number;
@@ -23,7 +22,6 @@ export default function CartSummary({ cartData, onUpdate }: CartSummaryProps) {
   const [isClearing, setIsClearing] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [settings, setSettings] = useState<PublicSettings>({
-    currencySymbol: '$',
     taxRate: 8.0,
     shippingRate: 9.99,
     freeShippingThreshold: 50
@@ -31,14 +29,12 @@ export default function CartSummary({ cartData, onUpdate }: CartSummaryProps) {
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const router = useRouter();
 
-  // Fetch settings on component mount
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const publicSettings = await getPublicSettings();
         if (publicSettings) {
           setSettings({
-            currencySymbol: publicSettings.currencySymbol || '$',
             taxRate: publicSettings.taxRate || 8.0,
             shippingRate: publicSettings.shippingRate || 9.99,
             freeShippingThreshold: publicSettings.freeShippingThreshold || 50
@@ -111,29 +107,29 @@ export default function CartSummary({ cartData, onUpdate }: CartSummaryProps) {
       <div className="space-y-4 mb-6">
         <div className="flex justify-between text-gray-700">
           <span>Items ({cartData.totalItems})</span>
-          <span>{settings.currencySymbol}{cartData.totalPrice.toFixed(2)}</span>
+          <span>${cartData.totalPrice.toFixed(2)}</span>
         </div>
         
         <div className="flex justify-between text-gray-700">
           <span>Shipping</span>
           <span>
             {shipping === 0 ? (
-              `${settings.currencySymbol}${settings.shippingRate.toFixed(2)}`
-            ) : (
               <span className="text-green-600 font-medium">FREE</span>
+            ) : (
+              `$${shipping.toFixed(2)}`
             )}
           </span>
         </div>
         
         <div className="flex justify-between text-gray-700">
           <span>Tax ({settings.taxRate}%)</span>
-          <span>{settings.currencySymbol}{tax.toFixed(2)}</span>
+          <span>${tax.toFixed(2)}</span>
         </div>
         
         <div className="border-t pt-4">
           <div className="flex justify-between text-xl font-bold text-gray-900">
             <span>Total</span>
-            <span>{settings.currencySymbol}{finalTotal.toFixed(2)}</span>
+            <span>${finalTotal.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -142,9 +138,9 @@ export default function CartSummary({ cartData, onUpdate }: CartSummaryProps) {
       {shipping > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
           <p className="text-sm text-blue-800">
-            <span className="font-medium">Free shipping</span> on orders over {settings.currencySymbol}{settings.freeShippingThreshold}!
+            <span className="font-medium">Free shipping</span> on orders over ${settings.freeShippingThreshold}!
             <br />
-            Add {settings.currencySymbol}{(settings.freeShippingThreshold - cartData.totalPrice).toFixed(2)} more to qualify.
+            Add ${(settings.freeShippingThreshold - cartData.totalPrice).toFixed(2)} more to qualify.
           </p>
         </div>
       )}
@@ -156,7 +152,7 @@ export default function CartSummary({ cartData, onUpdate }: CartSummaryProps) {
           disabled={isCheckingOut || cartData.totalItems === 0}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isCheckingOut ? 'Redirecting...' : `Proceed to Checkout - ${settings.currencySymbol}${finalTotal.toFixed(2)}`}
+          {isCheckingOut ? 'Redirecting...' : `Proceed to Checkout - $${finalTotal.toFixed(2)}`}
         </button>
         
         {cartData.totalItems > 0 && (
