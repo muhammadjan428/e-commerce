@@ -15,7 +15,6 @@ import {
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCartItemsCount } from '@/lib/actions/cart.actions';
-import { getUserPurchasesCount } from '@/lib/actions/purchase.actions';
 import { UserButton, SignInButton, useAuth } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 
@@ -26,7 +25,6 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [purchasesCount, setPurchasesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   // fetch cart count
@@ -43,25 +41,12 @@ export default function Navbar() {
     }
   };
 
-  // fetch purchases count
-  const fetchPurchasesCount = async () => {
-    try {
-      const count = await getUserPurchasesCount();
-      setPurchasesCount(count);
-    } catch (error) {
-      console.error('Failed to fetch purchases count:', error);
-      setPurchasesCount(0);
-    }
-  };
-
   // Fetch count on mount and when user signs in/out
   useEffect(() => {
     if (isSignedIn) {
       fetchCartCount();
-      fetchPurchasesCount();
     } else {
       setCartCount(0);
-      setPurchasesCount(0);
     }
   }, [isSignedIn]);
 
@@ -69,7 +54,6 @@ export default function Navbar() {
   useEffect(() => {
     if (isSignedIn) {
       fetchCartCount();
-      fetchPurchasesCount();
     }
   }, [pathname, isSignedIn]);
 
@@ -86,16 +70,11 @@ export default function Navbar() {
       if (isSignedIn) fetchCartCount();
     };
 
-    const handlePurchaseUpdate = () => {
-      if (isSignedIn) fetchPurchasesCount();
-    };
 
     window.addEventListener('cartUpdated', handleCartUpdate);
-    window.addEventListener('purchaseUpdated', handlePurchaseUpdate);
     
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);
-      window.removeEventListener('purchaseUpdated', handlePurchaseUpdate);
     };
   }, [isSignedIn]);
 
@@ -163,15 +142,6 @@ export default function Navbar() {
               >
                 <Package size={16} />
                 <span>Purchases</span>
-                {purchasesCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
-                  >
-                    {purchasesCount > 99 ? '99+' : purchasesCount}
-                  </motion.span>
-                )}
               </Link>
             )}
 
@@ -264,11 +234,6 @@ export default function Navbar() {
                 >
                   <Package className="w-5 h-5 text-gray-400" />
                   <span>My Purchases</span>
-                  {purchasesCount > 0 && (
-                    <span className="ml-auto bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                      {purchasesCount > 99 ? '99+' : purchasesCount}
-                    </span>
-                  )}
                 </Link>
               )}
 

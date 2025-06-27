@@ -6,10 +6,11 @@ export interface IPayment extends mongoose.Document {
   amount: number;
   location: string;
   userId: string;
+  productId: mongoose.Types.ObjectId[];  // Array of product IDs
   createdAt: Date;
 }
 
-const PaymentSchema = new mongoose.Schema<IPayment>({
+const PaymentSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -30,10 +31,15 @@ const PaymentSchema = new mongoose.Schema<IPayment>({
     type: String,
     required: true,
   },
+  productId: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true,
+  }],
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-export const Payment = mongoose.models.Payment || mongoose.model<IPayment>('Payment', PaymentSchema);
+export const Payment = mongoose.models.Payment || mongoose.model('Payment', PaymentSchema);

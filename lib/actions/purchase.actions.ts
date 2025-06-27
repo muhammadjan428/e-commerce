@@ -1,176 +1,161 @@
-"use server"
-import { connectToDatabase } from '../mongoose';
-import { Payment } from '../models/payment.model';
-import Product from '../models/product.model';
-import User from '../models/user.model';
-import { auth } from '@clerk/nextjs/server';
+"use server";
 
-export interface PurchasedProduct {
+import { connectToDatabase } from "@/lib/mongoose";
+import { Payment } from "@/lib/models/payment.model";
+import Product from "@/lib/models/product.model";
+
+export interface PurchaseWithProducts {
   _id: string;
-  userName: string;
-  userEmail: string;
-  price: number;
-  images: string[];
-  slug: string;
-  purchaseDate: Date;
-  paymentId: string;
+  email: string;
+  name: string;
   amount: number;
   location: string;
-  productName: string;
-  productId?: string;
+  userId: string;
+  createdAt: Date;
+  products: {
+    _id: string;
+    name: string;
+    price: number;
+    slug: string;
+    images: string[];
+  }[];
 }
 
-// Get all purchased products for the current user
-export async function getUserPurchases(): Promise<PurchasedProduct[]> {
+// Get all purchases for a specific user with populated product details
+export async function getUserPurchases(userId: string): Promise<PurchaseWithProducts[]> {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
     await connectToDatabase();
 
-    // Find all payments for this user and get user details
-    const payments = await Payment.find({ userId }).sort({ createdAt: -1 });
+    const purchases = await Payment.find({ userId })
+      .populate({
+        path: 'productId',
+        model: Product,
+        select: 'name price slug images'
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    if (!payments.length) {
-      return [];
-    }
-
-    // Get user details
-    const user = await User.findOne({ clerkId: userId });
-    
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    // Create purchased products array with product details
-    const purchasedProducts: PurchasedProduct[] = [];
-
-    for (const payment of payments) {
-      let productName = 'Unknown Product';
-      let productImages: string[] = [];
-      let productSlug = '';
-
-      // If payment has productId, fetch product details
-      if (payment.productId) {
-        try {
-          const product = await Product.findById(payment.productId);
-          if (product) {
-            productName = product.name;
-            productImages = product.images || [];
-            productSlug = product.slug;
-          }
-        } catch (error) {
-          console.error('Error fetching product details:', error);
-        }
-      }
-
-      const purchasedProduct: PurchasedProduct = {
-        _id: payment._id.toString(),
-        userName: `${user.first_name} ${user.last_name}`,
-        userEmail: user.email,
-        price: payment.amount,
-        images: productImages,
-        slug: productSlug,
-        purchaseDate: payment.createdAt,
-        paymentId: payment._id.toString(),
-        amount: payment.amount,
-        location: payment.location,
-        productName: productName,
-        productId: payment.productId?.toString(),
-      };
-
-      purchasedProducts.push(purchasedProduct);
-    }
-
-    return purchasedProducts;
+    return purchases.map(purchase => ({
+      _id: purchase._id.toString(),
+      email: purchase.email,
+      name: purchase.name,
+      amount: purchase.amount,
+      location: purchase.location,
+      userId: purchase.userId,
+      createdAt: purchase.createdAt,
+      products: purchase.productId.map((product: any) => ({
+        _id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        slug: product.slug,
+        images: product.images || []
+      }))
+    }));
   } catch (error) {
-    console.error('Error fetching user purchases:', error);
-    throw new Error('Failed to fetch purchases');
+    console.error("Error fetching user purchases:", error);
+    throw new Error("Failed to fetch purchases");
   }
 }
 
-// Get purchase count for the current user
-export async function getUserPurchasesCount(): Promise<number> {
+// Get all purchases (admin function)
+export async function getAllPurchases(): Promise<PurchaseWithProducts[]> {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
-      return 0;
-    }
-
     await connectToDatabase();
 
-    const count = await Payment.countDocuments({ userId });
-    return count;
+    const purchases = await Payment.find({})
+      .populate({
+        path: 'productId',
+        model: Product,
+        select: 'name price slug images'
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return purchases.map(purchase => ({
+      _id: purchase._id.toString(),
+      email: purchase.email,
+      name: purchase.name,
+      amount: purchase.amount,
+      location: purchase.location,
+      userId: purchase.userId,
+      createdAt: purchase.createdAt,
+      products: purchase.productId.map((product: any) => ({
+        _id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        slug: product.slug,
+        images: product.images || []
+      }))
+    }));
   } catch (error) {
-    console.error('Error fetching purchases count:', error);
-    return 0;
+    console.error("Error fetching all purchases:", error);
+    throw new Error("Failed to fetch purchases");
   }
 }
 
-// Get a specific purchase by payment ID
-export async function getPurchaseById(paymentId: string): Promise<PurchasedProduct | null> {
+// Get a single purchase by ID
+export async function getPurchaseById(purchaseId: string): Promise<PurchaseWithProducts | null> {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
     await connectToDatabase();
 
-    const payment = await Payment.findOne({ _id: paymentId, userId });
+    const purchase = await Payment.findById(purchaseId)
+      .populate({
+        path: 'productId',
+        model: Product,
+        select: 'name price slug images'
+      })
+      .lean();
 
-    if (!payment) {
+    if (!purchase) {
       return null;
     }
 
-    // Get user details
-    const user = await User.findOne({ clerkId: userId });
-    
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    let productName = 'Unknown Product';
-    let productImages: string[] = [];
-    let productSlug = '';
-
-    // If payment has productId, fetch product details
-    if (payment.productId) {
-      try {
-        const product = await Product.findById(payment.productId);
-        if (product) {
-          productName = product.name;
-          productImages = product.images || [];
-          productSlug = product.slug;
-        }
-      } catch (error) {
-        console.error('Error fetching product details:', error);
-      }
-    }
-
-    const purchasedProduct: PurchasedProduct = {
-      _id: payment._id.toString(),
-      userName: `${user.first_name} ${user.last_name}`,
-      userEmail: user.email,
-      price: payment.amount,
-      images: productImages,
-      slug: productSlug,
-      purchaseDate: payment.createdAt,
-      paymentId: payment._id.toString(),
-      amount: payment.amount,
-      location: payment.location,
-      productName: productName,
-      productId: payment.productId?.toString(),
+    return {
+      _id: purchase._id.toString(),
+      email: purchase.email,
+      name: purchase.name,
+      amount: purchase.amount,
+      location: purchase.location,
+      userId: purchase.userId,
+      createdAt: purchase.createdAt,
+      products: purchase.productId.map((product: any) => ({
+        _id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        slug: product.slug,
+        images: product.images || []
+      }))
     };
-
-    return purchasedProduct;
   } catch (error) {
-    console.error('Error fetching purchase:', error);
-    return null;
+    console.error("Error fetching purchase by ID:", error);
+    throw new Error("Failed to fetch purchase");
+  }
+}
+
+// Get purchase statistics for a user
+export async function getUserPurchaseStats(userId: string) {
+  try {
+    await connectToDatabase();
+
+    const stats = await Payment.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: null,
+          totalPurchases: { $sum: 1 },
+          totalSpent: { $sum: "$amount" },
+          totalProducts: { $sum: { $size: "$productId" } }
+        }
+      }
+    ]);
+
+    return stats[0] || {
+      totalPurchases: 0,
+      totalSpent: 0,
+      totalProducts: 0
+    };
+  } catch (error) {
+    console.error("Error fetching user purchase stats:", error);
+    throw new Error("Failed to fetch purchase statistics");
   }
 }
