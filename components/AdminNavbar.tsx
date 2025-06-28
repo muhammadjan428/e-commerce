@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Package, Settings, ShoppingCart, Users, LayoutDashboard, X, LayoutGrid } from 'lucide-react'
+import { Menu, Package, Settings, ShoppingCart, Users, LayoutDashboard, X, LayoutGrid, MonitorSpeaker } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { UserButton } from '@clerk/nextjs'
@@ -12,6 +12,7 @@ const navLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/categories', label: 'Categories', icon: LayoutGrid },
+  { href: '/admin/billboards', label: 'Billboards', icon: MonitorSpeaker },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/customers', label: 'Customers', icon: Users },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
@@ -55,12 +56,12 @@ export default function AdminNavbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-1 items-center">
+        <nav className="hidden lg:flex gap-1 items-center">
           {navLinks.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
-              className={`relative px-4 py-2 rounded-lg transition-all duration-300 group ${
+              className={`relative px-3 py-2 rounded-lg transition-all duration-300 group ${
                 pathname === href 
                   ? 'bg-blue-50 text-blue-600' 
                   : 'text-gray-600 hover:bg-gray-50'
@@ -103,7 +104,7 @@ export default function AdminNavbar() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden rounded-full bg-gray-50 hover:bg-gray-100"
+            className="lg:hidden rounded-full bg-gray-50 hover:bg-gray-100"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -124,7 +125,7 @@ export default function AdminNavbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden bg-white border-t border-gray-100 overflow-hidden"
+            className="lg:hidden bg-white border-t border-gray-100 overflow-hidden"
           >
             <nav className="flex flex-col">
               {navLinks.map(({ href, label, icon: Icon }, index) => (

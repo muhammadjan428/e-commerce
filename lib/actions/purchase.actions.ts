@@ -35,7 +35,7 @@ export async function getUserPurchases(userId: string): Promise<PurchaseWithProd
       .sort({ createdAt: -1 })
       .lean();
 
-    return purchases.map(purchase => ({
+    return purchases.map((purchase: any) => ({
       _id: purchase._id.toString(),
       email: purchase.email,
       name: purchase.name,
@@ -43,13 +43,15 @@ export async function getUserPurchases(userId: string): Promise<PurchaseWithProd
       location: purchase.location,
       userId: purchase.userId,
       createdAt: purchase.createdAt,
-      products: purchase.productId.map((product: any) => ({
-        _id: product._id.toString(),
-        name: product.name,
-        price: product.price,
-        slug: product.slug,
-        images: product.images || []
-      }))
+      products: Array.isArray(purchase.productId) 
+        ? purchase.productId.map((product: any) => ({
+            _id: product._id.toString(),
+            name: product.name,
+            price: product.price,
+            slug: product.slug,
+            images: product.images || []
+          }))
+        : []
     }));
   } catch (error) {
     console.error("Error fetching user purchases:", error);
@@ -71,7 +73,7 @@ export async function getAllPurchases(): Promise<PurchaseWithProducts[]> {
       .sort({ createdAt: -1 })
       .lean();
 
-    return purchases.map(purchase => ({
+    return purchases.map((purchase: any) => ({
       _id: purchase._id.toString(),
       email: purchase.email,
       name: purchase.name,
@@ -79,56 +81,19 @@ export async function getAllPurchases(): Promise<PurchaseWithProducts[]> {
       location: purchase.location,
       userId: purchase.userId,
       createdAt: purchase.createdAt,
-      products: purchase.productId.map((product: any) => ({
-        _id: product._id.toString(),
-        name: product.name,
-        price: product.price,
-        slug: product.slug,
-        images: product.images || []
-      }))
+      products: Array.isArray(purchase.productId) 
+        ? purchase.productId.map((product: any) => ({
+            _id: product._id.toString(),
+            name: product.name,
+            price: product.price,
+            slug: product.slug,
+            images: product.images || []
+          }))
+        : []
     }));
   } catch (error) {
     console.error("Error fetching all purchases:", error);
     throw new Error("Failed to fetch purchases");
-  }
-}
-
-// Get a single purchase by ID
-export async function getPurchaseById(purchaseId: string): Promise<PurchaseWithProducts | null> {
-  try {
-    await connectToDatabase();
-
-    const purchase = await Payment.findById(purchaseId)
-      .populate({
-        path: 'productId',
-        model: Product,
-        select: 'name price slug images'
-      })
-      .lean();
-
-    if (!purchase) {
-      return null;
-    }
-
-    return {
-      _id: purchase._id.toString(),
-      email: purchase.email,
-      name: purchase.name,
-      amount: purchase.amount,
-      location: purchase.location,
-      userId: purchase.userId,
-      createdAt: purchase.createdAt,
-      products: purchase.productId.map((product: any) => ({
-        _id: product._id.toString(),
-        name: product.name,
-        price: product.price,
-        slug: product.slug,
-        images: product.images || []
-      }))
-    };
-  } catch (error) {
-    console.error("Error fetching purchase by ID:", error);
-    throw new Error("Failed to fetch purchase");
   }
 }
 
@@ -156,6 +121,66 @@ export async function getUserPurchaseStats(userId: string) {
     };
   } catch (error) {
     console.error("Error fetching user purchase stats:", error);
+    throw new Error("Failed to fetch purchase statistics");
+  }
+}
+
+
+// Get purchase statistics for admin dashboard
+export async function getAdminPurchaseStats() {
+  try {
+    await connectToDatabase();
+
+    const stats = await Payment.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalPurchases: { $sum: 1 },
+          totalRevenue: { $sum: "$amount" },
+          totalProducts: { $sum: { $size: "$productId" } }
+        }
+      }
+    ]);
+
+    const statusStats = await Payment.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const monthlyStats = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          totalSales: { $sum: "$amount" },
+          orderCount: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": -1, "_id.month": -1 }
+      },
+      {
+        $limit: 12
+      }
+    ]);
+
+    return {
+      overview: stats[0] || {
+        totalPurchases: 0,
+        totalRevenue: 0,
+        totalProducts: 0
+      },
+      statusBreakdown: statusStats,
+      monthlyTrends: monthlyStats
+    };
+  } catch (error) {
+    console.error("Error fetching admin purchase stats:", error);
     throw new Error("Failed to fetch purchase statistics");
   }
 }
