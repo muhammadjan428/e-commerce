@@ -90,10 +90,10 @@ export default function Navbar() {
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-gray-100'
-          : 'bg-white border-b border-gray-100'
-      }`}
+    scrolled
+      ? 'backdrop-blur-lg shadow-lg border-b border-white/20'
+      : 'bg-transparent border-b border-transparent'
+  }`}
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
