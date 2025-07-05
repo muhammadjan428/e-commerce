@@ -15,36 +15,81 @@ export type ProductType = {
 };
 
 // ✅ GET ALL PRODUCTS with pagination and category filter
-export const getAllProducts = async (
-  page = 1,
-  limit = 6,
-  categoryId?: string
-): Promise<ProductType[]> => {
-  await connectToDatabase();
-  const skip = (page - 1) * limit;
 
-  const query = categoryId ? { category: categoryId } : {};
+export async function getAllProducts(
+  page: number = 1,
+  limit: number = 6,
+  categoryId?: string,
+  searchQuery?: string
+) {
+  try {
+    await connectToDatabase();
+    
+    const skip = (page - 1) * limit;
+    
+    // Build the query object
+    const query: any = {};
+    
+    // Add category filter if provided
+    if (categoryId) {
+      query.category = categoryId;
+    }
+    
+    // Add search filter if provided
+    if (searchQuery && searchQuery.trim()) {
+      query.$or = [
+        { name: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search in name
+        { description: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search in description
+      ];
+    }
+    
+    const products = await Product.find(query)
+      .populate('category', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    
+    return JSON.parse(JSON.stringify(products));
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw new Error('Failed to fetch products');
+  }
+}
 
-  const products = await Product.find(query)
-    .populate('category', 'name')
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 })
-    .lean();
 
-  return products.map((p: any) => ({
-    _id: p._id.toString(),
-    name: p.name,
-    slug: p.slug,
-    price: p.price,
-    images: p.images || [], // Include images
-    category: p.category ? {
-      _id: p.category._id?.toString() || '',
-      name: p.category.name || '',
-    } : null,
-    createdAt: p.createdAt?.toISOString() || '',
-  }));
-};
+// it will be delted
+
+// export const getAllProducts = async (
+//   page = 1,
+//   limit = 6,
+//   categoryId?: string
+// ): Promise<ProductType[]> => {
+//   await connectToDatabase();
+//   const skip = (page - 1) * limit;
+
+//   const query = categoryId ? { category: categoryId } : {};
+
+//   const products = await Product.find(query)
+//     .populate('category', 'name')
+//     .skip(skip)
+//     .limit(limit)
+//     .sort({ createdAt: -1 })
+//     .lean();
+
+//   return products.map((p: any) => ({
+//     _id: p._id.toString(),
+//     name: p.name,
+//     slug: p.slug,
+//     price: p.price,
+//     images: p.images || [], // Include images
+//     category: p.category ? {
+//       _id: p.category._id?.toString() || '',
+//       name: p.category.name || '',
+//     } : null,
+//     createdAt: p.createdAt?.toISOString() || '',
+//   }));
+// };
 
 // ✅ CREATE PRODUCT - FIXED TO HANDLE IMAGES
 export const createProduct = async (formData: FormData) => {

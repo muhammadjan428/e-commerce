@@ -33,13 +33,13 @@ export default function AdminNavbar() {
   }, [])
 
   return (
-    <header
-  className={`sticky top-0 z-50 transition-all duration-300 ${
+     <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
     scrolled
       ? 'backdrop-blur-lg shadow-lg border-b border-white/20'
       : 'bg-transparent border-b border-transparent'
   }`}
->
+    >
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo with animation */}
         <Link href="/admin" className="flex items-center gap-2">

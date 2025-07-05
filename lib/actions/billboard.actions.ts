@@ -25,7 +25,7 @@ export async function createBillboard(data: BillboardFormData) {
 
     return {
       success: true,
-      billboard: JSON.parse(JSON.stringify(billboard)), // ✅ Fix here
+      billboard: JSON.parse(JSON.stringify(billboard)), // ✅ This is correct
     };
   } catch (error: any) {
     console.error('Error creating billboard:', error);
@@ -153,7 +153,10 @@ export async function updateBillboard(id: string, data: BillboardFormData) {
     }
 
     revalidatePath('/admin/billboards');
-    return { success: true, billboard };
+    return { 
+      success: true, 
+      billboard: JSON.parse(JSON.stringify(billboard)) // ✅ Fixed here
+    };
   } catch (error: any) {
     console.error('Error updating billboard:', error);
     return { 
@@ -200,7 +203,10 @@ export async function toggleBillboardStatus(id: string) {
     await billboard.save();
 
     revalidatePath('/admin/billboards');
-    return { success: true, billboard };
+    return { 
+      success: true, 
+      billboard: JSON.parse(JSON.stringify(billboard)) // ✅ Fixed here
+    };
   } catch (error: any) {
     console.error('Error toggling billboard status:', error);
     return { 

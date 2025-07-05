@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { getSettings, updateSettings, resetSettings, SettingsType } from '@/lib/actions/settings.actions';
+import { Settings, DollarSign, Phone, Globe, Mail, Package, Sparkles, ShoppingCart, Percent, Truck, Shield } from 'lucide-react';
+import AnimatedBackground from '@/components/AnimatedBackground';
 
 const AdminSettingsPage = () => {
   const [settings, setSettings] = useState<SettingsType | null>(null);
@@ -34,7 +36,12 @@ const AdminSettingsPage = () => {
     try {
       setSaving(true);
       await updateSettings(settings);
-      toast.success('Settings updated successfully!');
+      toast.success('Settings updated successfully!', {
+        style: {
+          background: 'white',
+          color: '#16a34a',
+        },
+      });
     } catch (error) {
       toast.error('Failed to update settings');
       console.error('Error updating settings:', error);
@@ -49,7 +56,7 @@ const AdminSettingsPage = () => {
     try {
       setSaving(true);
       await resetSettings();
-      await fetchSettings(); // Refresh settings
+      await fetchSettings();
       toast.success('Settings reset to default values');
     } catch (error) {
       toast.error('Failed to reset settings');
@@ -76,7 +83,6 @@ const AdminSettingsPage = () => {
     });
   };
 
-  // Helper function to safely get numeric values
   const getNumericValue = (value: any, defaultValue: number = 0): number => {
     if (typeof value === 'number' && !isNaN(value)) return value;
     if (typeof value === 'string' && value.trim() !== '') {
@@ -86,19 +92,19 @@ const AdminSettingsPage = () => {
     return defaultValue;
   };
 
-  // Helper function to safely get string values
   const getStringValue = (value: any, defaultValue: string = ''): string => {
     return typeof value === 'string' ? value : defaultValue;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        <AnimatedBackground />
+        <div className="relative z-10 max-w-6xl mx-auto p-6">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-8"></div>
-            <div className="bg-white rounded-lg shadow">
-              <div className="h-64 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gradient-to-r from-gray-200 to-gray-300 rounded-2xl w-64 mb-8"></div>
+            <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
+              <div className="h-96 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl"></div>
             </div>
           </div>
         </div>
@@ -108,13 +114,17 @@ const AdminSettingsPage = () => {
 
   if (!settings) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        <AnimatedBackground />
+        <div className="relative z-10 max-w-6xl mx-auto p-6">
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Failed to load settings</h2>
+            <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-pink-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <Settings className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Failed to load settings</h2>
             <button 
               onClick={fetchSettings}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Retry
             </button>
@@ -125,282 +135,323 @@ const AdminSettingsPage = () => {
   }
 
   const tabs = [
-    { id: 'business', name: 'Business', icon: '💼' },
-    { id: 'contact', name: 'Contact', icon: '📞' },
-    { id: 'social', name: 'Social Media', icon: '🌐' },
-    { id: 'email', name: 'Email', icon: '📧' },
+    { id: 'business', name: 'Business', icon: ShoppingCart, gradient: 'from-blue-500 to-purple-600' },
+    { id: 'contact', name: 'Contact', icon: Phone, gradient: 'from-green-500 to-teal-600' },
+    { id: 'social', name: 'Social Media', icon: Globe, gradient: 'from-pink-500 to-rose-600' },
+    { id: 'email', name: 'Email', icon: Mail, gradient: 'from-orange-500 to-red-600' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">Manage your store configuration and preferences</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <span className="mr-2">{tab.icon}</span>
-                  {tab.name}
-                </button>
-              ))}
-            </nav>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <AnimatedBackground />
+      
+      <div className="relative z-10">
+        <div className="max-w-6xl mx-auto p-6">
+          {/* Header Section */}
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-blue-800 text-sm font-medium mb-4">
+              <Settings className="w-4 h-4" />
+              <span>Configuration Panel</span>
+            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-4">
+              Settings
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Manage your store configuration and preferences
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6">
-            {/* Business Tab */}
-            {activeTab === 'business' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Business Settings</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tax Rate (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={getNumericValue(settings.taxRate, 8.5)}
-                      onChange={(e) => updateField('taxRate', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
+          {/* Tabs */}
+          <div className="mb-8">
+            <div className="flex flex-wrap justify-center gap-4">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`group relative px-6 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === tab.id
+                        ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg shadow-blue-500/25`
+                        : 'bg-white/70 backdrop-blur-sm border border-white/20 text-gray-700 hover:bg-white/90'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-5 h-5" />
+                      <span>{tab.name}</span>
+                    </div>
+                    {activeTab === tab.id && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Form Container */}
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden">
+            <form onSubmit={handleSubmit} className="p-8">
+              {/* Business Tab */}
+              {activeTab === 'business' && (
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Business Settings</h2>
+                    <p className="text-gray-600">Configure your store's financial and shipping settings</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <Percent className="w-4 h-4 text-white" />
+                        </div>
+                        <label className="text-lg font-bold text-gray-900">
+                          Tax Rate (%)
+                        </label>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={getNumericValue(settings.taxRate, 8.5)}
+                        onChange={(e) => updateField('taxRate', parseFloat(e.target.value) || 0)}
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white"
+                        required
+                      />
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <DollarSign className="w-4 h-4 text-white" />
+                        </div>
+                        <label className="text-lg font-bold text-gray-900">
+                          Shipping Rate
+                        </label>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={getNumericValue(settings.shippingRate, 5.99)}
+                        onChange={(e) => updateField('shippingRate', parseFloat(e.target.value) || 0)}
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white"
+                        required
+                      />
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <Truck className="w-4 h-4 text-white" />
+                        </div>
+                        <label className="text-lg font-bold text-gray-900">
+                          Free Shipping Threshold
+                        </label>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={getNumericValue(settings.freeShippingThreshold, 50)}
+                        onChange={(e) => updateField('freeShippingThreshold', parseFloat(e.target.value) || 0)}
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white"
+                        required
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Shipping Rate
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={getNumericValue(settings.shippingRate, 5.99)}
-                      onChange={(e) => updateField('shippingRate', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Free Shipping Threshold
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={getNumericValue(settings.freeShippingThreshold, 50)}
-                      onChange={(e) => updateField('freeShippingThreshold', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h3 className="font-medium text-blue-900 mb-2">Preview</h3>
-                  <div className="text-sm text-blue-800 space-y-1">
-                    <p>Tax Rate: {getNumericValue(settings.taxRate, 8.5)}%</p>
-                    <p>Shipping: {getNumericValue(settings.shippingRate, 5.99)}</p>
-                    <p>Free shipping on orders over: {getNumericValue(settings.freeShippingThreshold, 50)}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Contact Tab */}
-            {activeTab === 'contact' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Contact Email
-                    </label>
-                    <input
-                      type="email"
-                      value={getStringValue(settings.contactEmail, 'contact@store.com')}
-                      onChange={(e) => updateField('contactEmail', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Contact Phone
-                    </label>
-                    <input
-                      type="tel"
-                      value={getStringValue(settings.contactPhone, '+1-234-567-8900')}
-                      onChange={(e) => updateField('contactPhone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Social Media Tab */}
-            {activeTab === 'social' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Social Media Links</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Facebook URL
-                    </label>
-                    <input
-                      type="url"
-                      value={getStringValue(settings.socialMedia?.facebook)}
-                      onChange={(e) => updateNestedField('socialMedia', 'facebook', e.target.value)}
-                      placeholder="https://facebook.com/yourpage"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Twitter/X URL
-                    </label>
-                    <input
-                      type="url"
-                      value={getStringValue(settings.socialMedia?.twitter)}
-                      onChange={(e) => updateNestedField('socialMedia', 'twitter', e.target.value)}
-                      placeholder="https://twitter.com/youraccount or https://x.com/youraccount"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Instagram URL
-                    </label>
-                    <input
-                      type="url"
-                      value={getStringValue(settings.socialMedia?.instagram)}
-                      onChange={(e) => updateNestedField('socialMedia', 'instagram', e.target.value)}
-                      placeholder="https://instagram.com/youraccount"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      LinkedIn URL
-                    </label>
-                    <input
-                      type="url"
-                      value={getStringValue(settings.socialMedia?.linkedin)}
-                      onChange={(e) => updateNestedField('socialMedia', 'linkedin', e.target.value)}
-                      placeholder="https://linkedin.com/company/yourcompany"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6">
+                    <h3 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
+                      <Shield className="w-5 h-5" />
+                      Preview
+                    </h3>
+                    <div className="text-blue-800 space-y-2">
+                      <p className="font-medium">Tax Rate: {getNumericValue(settings.taxRate, 8.5)}%</p>
+                      <p className="font-medium">Shipping: ${getNumericValue(settings.shippingRate, 5.99)}</p>
+                      <p className="font-medium">Free shipping on orders over: ${getNumericValue(settings.freeShippingThreshold, 50)}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Email Tab */}
-            {activeTab === 'email' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Email Settings</h2>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="orderConfirmation"
-                      checked={Boolean(settings.emailSettings?.orderConfirmation)}
-                      onChange={(e) => updateNestedField('emailSettings', 'orderConfirmation', e.target.checked)}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="orderConfirmation" className="ml-2 text-sm text-gray-700">
-                      Send order confirmation emails
-                    </label>
+              {/* Contact Tab */}
+              {activeTab === 'contact' && (
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Contact Information</h2>
+                    <p className="text-gray-600">Set up your store's contact details</p>
                   </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <Mail className="w-4 h-4 text-white" />
+                        </div>
+                        <label className="text-lg font-bold text-gray-900">
+                          Contact Email
+                        </label>
+                      </div>
+                      <input
+                        type="email"
+                        value={getStringValue(settings.contactEmail, 'contact@store.com')}
+                        onChange={(e) => updateField('contactEmail', e.target.value)}
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white"
+                        required
+                      />
+                    </div>
 
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="shippingUpdates"
-                      checked={Boolean(settings.emailSettings?.shippingUpdates)}
-                      onChange={(e) => updateNestedField('emailSettings', 'shippingUpdates', e.target.checked)}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="shippingUpdates" className="ml-2 text-sm text-gray-700">
-                      Send shipping update emails
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="promotionalEmails"
-                      checked={Boolean(settings.emailSettings?.promotionalEmails)}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      onChange={(e) => updateNestedField('emailSettings', 'promotionalEmails', e.target.checked)}
-                    />
-                    <label htmlFor="promotionalEmails" className="ml-2 text-sm text-gray-700">
-                      Send promotional emails
-                    </label>
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <Phone className="w-4 h-4 text-white" />
+                        </div>
+                        <label className="text-lg font-bold text-gray-900">
+                          Contact Phone
+                        </label>
+                      </div>
+                      <input
+                        type="tel"
+                        value={getStringValue(settings.contactPhone, '+1-234-567-8900')}
+                        onChange={(e) => updateField('contactPhone', e.target.value)}
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-6 border-t border-gray-200 mt-8">
-              <button
-                type="button"
-                onClick={handleReset}
-                className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-                disabled={saving}
-              >
-                Reset to Default
-              </button>
+              {/* Social Media Tab */}
+              {activeTab === 'social' && (
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Social Media Links</h2>
+                    <p className="text-gray-600">Connect your social media accounts</p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {[
+                      { key: 'facebook', label: 'Facebook URL', placeholder: 'https://facebook.com/yourpage', gradient: 'from-blue-500 to-indigo-600' },
+                      { key: 'twitter', label: 'Twitter/X URL', placeholder: 'https://twitter.com/youraccount', gradient: 'from-sky-500 to-blue-600' },
+                      { key: 'instagram', label: 'Instagram URL', placeholder: 'https://instagram.com/youraccount', gradient: 'from-pink-500 to-rose-600' },
+                      { key: 'linkedin', label: 'LinkedIn URL', placeholder: 'https://linkedin.com/company/yourcompany', gradient: 'from-blue-600 to-cyan-600' },
+                    ].map((social) => (
+                      <div key={social.key} className="group">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className={`w-8 h-8 bg-gradient-to-r ${social.gradient} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                            <Globe className="w-4 h-4 text-white" />
+                          </div>
+                          <label className="text-lg font-bold text-gray-900">
+                            {social.label}
+                          </label>
+                        </div>
+                        <input
+                          type="url"
+                          value={getStringValue(settings.socialMedia?.[social.key as keyof typeof settings.socialMedia])}
+                          onChange={(e) => updateNestedField('socialMedia', social.key, e.target.value)}
+                          placeholder={social.placeholder}
+                          className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              <div className="space-x-4">
+              {/* Email Tab */}
+              {activeTab === 'email' && (
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Email Settings</h2>
+                    <p className="text-gray-600">Configure your email preferences</p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {[
+                      { key: 'orderConfirmation', label: 'Send order confirmation emails', description: 'Automatically send confirmation emails when orders are placed' },
+                      { key: 'shippingUpdates', label: 'Send shipping update emails', description: 'Notify customers about shipping status changes' },
+                      { key: 'promotionalEmails', label: 'Send promotional emails', description: 'Send marketing and promotional content to customers' },
+                    ].map((email) => (
+                      <div key={email.key} className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 p-6 hover:bg-white transition-all duration-300">
+                        <div className="flex items-start gap-4">
+                          <div className="flex items-center h-6">
+                            <input
+                              type="checkbox"
+                              id={email.key}
+                              checked={Boolean(settings.emailSettings?.[email.key as keyof typeof settings.emailSettings])}
+                              onChange={(e) => updateNestedField('emailSettings', email.key, e.target.checked)}
+                              className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 focus:ring-2 transition-all duration-300"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label htmlFor={email.key} className="text-lg font-bold text-gray-900 cursor-pointer">
+                              {email.label}
+                            </label>
+                            <p className="text-gray-600 mt-1">{email.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-gray-100 mt-8">
                 <button
                   type="button"
-                  onClick={fetchSettings}
-                  className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                  onClick={handleReset}
+                  className="group relative overflow-hidden px-8 py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50"
                   disabled={saving}
                 >
-                  Cancel
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                  <span className="relative">Reset to Default</span>
                 </button>
-                
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Settings'}
-                </button>
+
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={fetchSettings}
+                    className="px-8 py-4 rounded-2xl font-bold text-gray-700 bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white transition-all duration-300 transform hover:scale-105"
+                    disabled={saving}
+                  >
+                    Cancel
+                  </button>
+                  
+                  <button
+                    type="submit"
+                    className={`group relative overflow-hidden px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 ${
+                      saving
+                        ? 'bg-gray-400 cursor-not-allowed text-white'
+                        : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30'
+                    }`}
+                    disabled={saving}
+                  >
+                    {!saving && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    )}
+                    <div className="relative flex items-center gap-3">
+                      {saving ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          <span>Saving...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5" />
+                          <span>Save Settings</span>
+                        </>
+                      )}
+                    </div>
+                  </button>
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
