@@ -16,7 +16,7 @@ const CreateCategoryForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    
     try {
       await createCategory(name);
       toast.success('Category created successfully!', {
@@ -25,7 +25,6 @@ const CreateCategoryForm = () => {
           color: '#16a34a',
         },
       });
-      
       setName('');
       router.refresh();
     } catch (error: any) {
@@ -37,33 +36,33 @@ const CreateCategoryForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div className="flex-1">
           <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter category name (e.g., Electronics, Clothing, Books)"
-            className="h-12 text-lg bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-2xl px-4"
+            className="h-10 sm:h-12 text-base sm:text-lg bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl sm:rounded-2xl px-3 sm:px-4"
             required
           />
         </div>
         <Button
           type="submit"
           disabled={loading || !name.trim()}
-          className="group relative overflow-hidden h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-2xl shadow-lg shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="group relative overflow-hidden h-10 sm:h-12 px-6 sm:px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl sm:rounded-2xl shadow-lg shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
-          <span className="relative flex items-center gap-2">
+          <span className="relative flex items-center gap-2 justify-center">
             {loading ? (
               <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating...
+                <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="text-sm sm:text-base">Creating...</span>
               </>
             ) : (
               <>
-                <Plus className="w-4 h-4" />
-                Add Category
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-sm sm:text-base">Add Category</span>
               </>
             )}
           </span>

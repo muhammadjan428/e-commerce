@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { getAllProducts } from "@/lib/actions/product.actions";
@@ -5,71 +8,108 @@ import { getAllCategories } from "@/lib/actions/category.actions";
 import DeleteButton from "@/components/shared/DeleteButton";
 import { Plus, Edit, ChevronLeft, ChevronRight, Sparkles, Star, Package } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import Loading from "@/components/shared/Loading";
 
-export default async function ProductsPage({
-  searchParams,
-}: {
+interface ProductsPageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const resolvedSearchParams = await searchParams;
-  const page = Number(resolvedSearchParams?.page ?? 1);
-  const category =
-    typeof resolvedSearchParams?.category === "string" ? resolvedSearchParams.category : "";
+}
 
-  const [products, categories] = await Promise.all([
-    getAllProducts(page, 6, category),
-    getAllCategories(),
-  ]);
+export default function ProductsPage({ searchParams }: ProductsPageProps) {
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [category, setCategory] = useState("");
+  const [hasNextPage, setHasNextPage] = useState(false);
 
-  const hasNextPage = products.length === 6;
+  useEffect(() => {
+    const initializeParams = async () => {
+      if (searchParams) {
+        const resolvedSearchParams = await searchParams;
+        const pageParam = Number(resolvedSearchParams?.page ?? 1);
+        const categoryParam = typeof resolvedSearchParams?.category === "string" ? resolvedSearchParams.category : "";
+        
+        setPage(pageParam);
+        setCategory(categoryParam);
+      }
+    };
+
+    initializeParams();
+  }, [searchParams]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [productsData, categoriesData] = await Promise.all([
+          getAllProducts(page, 6, category),
+          getAllCategories(),
+        ]);
+
+        setProducts(productsData);
+        setCategories(categoriesData);
+        setHasNextPage(productsData.length === 6);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [page, category]);
+
+  if (loading) {
+    return <Loading message="Loading products..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <AnimatedBackground />
       
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto p-6">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6">
           {/* Header Section */}
-          <div className="mb-12">
-            <div className="flex flex-col sm:flex-row justify-between gap-6 items-start">
-              <div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-blue-800 text-sm font-medium mb-4">
-                  <Package className="w-4 h-4" />
+          <div className="mb-8 sm:mb-12">
+            <div className="flex flex-col lg:flex-row justify-between gap-4 sm:gap-6 items-start lg:items-center">
+              <div className="w-full lg:w-auto">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-blue-800 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+                  <Package className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Inventory Management</span>
                 </div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-4">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-3 sm:mb-4">
                   Product Management
                 </h1>
-                <p className="text-xl text-gray-600 leading-relaxed">
+                <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
                   Manage your product inventory and create new items
                 </p>
               </div>
               <Link
                 href="/admin/products/new"
-                className="group relative overflow-hidden px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 flex items-center gap-3"
+                className="group relative overflow-hidden px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 flex items-center gap-2 sm:gap-3 text-sm sm:text-base w-full sm:w-auto justify-center"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
-                <Plus className="w-5 h-5 relative z-10" />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" />
                 <span className="relative z-10">Create Product</span>
               </Link>
             </div>
           </div>
 
           {/* Category Filter */}
-          <div className="mb-12">
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Star className="w-4 h-4 text-white" />
+          <div className="mb-8 sm:mb-12">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl border border-white/20">
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
                   Filter by Category
                 </h2>
               </div>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4">
                 <Link
                   href="/admin/products"
-                  className={`group relative overflow-hidden px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                  className={`group relative overflow-hidden px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl lg:rounded-2xl font-medium sm:font-semibold transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm lg:text-base ${
                     !category
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25"
                       : "bg-white/80 text-gray-700 hover:bg-white hover:shadow-lg border border-gray-200"
@@ -82,7 +122,7 @@ export default async function ProductsPage({
                   <Link
                     key={cat._id}
                     href={`/admin/products?category=${cat._id}`}
-                    className={`group relative overflow-hidden px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    className={`group relative overflow-hidden px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl lg:rounded-2xl font-medium sm:font-semibold transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm lg:text-base ${
                       cat._id === category
                         ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25"
                         : "bg-white/80 text-gray-700 hover:bg-white hover:shadow-lg border border-gray-200"
@@ -98,33 +138,33 @@ export default async function ProductsPage({
 
           {/* Products Grid */}
           {products.length === 0 ? (
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl p-16 text-center border border-white/20">
-              <div className="w-24 h-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full mx-auto mb-6 flex items-center justify-center">
-                <Package className="w-12 h-12 text-gray-400" />
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl p-8 sm:p-12 lg:p-16 text-center border border-white/20">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+                <Package className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-400" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
                 No products found
               </h3>
-              <p className="text-gray-600 max-w-md mx-auto text-lg mb-8">
+              <p className="text-gray-600 max-w-md mx-auto text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 px-4">
                 {category
                   ? "No products in this category yet. Create your first product to get started!"
                   : "Get started by creating your first product."}
               </p>
               <Link
                 href="/admin/products/new"
-                className="group relative overflow-hidden px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 inline-flex items-center gap-3"
+                className="group relative overflow-hidden px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 inline-flex items-center gap-2 sm:gap-3 text-sm sm:text-base"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
-                <Plus className="w-5 h-5 relative z-10" />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" />
                 <span className="relative z-10">Create Product</span>
               </Link>
             </div>
           ) : (
-            <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
+            <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product: any) => (
                 <div
                   key={product._id}
-                  className="group bg-white/70 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/20 transform hover:scale-[1.02] hover:-translate-y-2"
+                  className="group bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/20 transform hover:scale-[1.02] hover:-translate-y-1 sm:hover:-translate-y-2"
                 >
                   {/* Product Image */}
                   <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -138,11 +178,11 @@ export default async function ProductsPage({
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                        <div className="text-center p-6">
-                          <div className="w-20 h-20 bg-gradient-to-r from-gray-300 to-gray-400 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                            <Sparkles className="w-8 h-8 text-gray-500" />
+                        <div className="text-center p-4 sm:p-6">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-gray-300 to-gray-400 rounded-xl sm:rounded-2xl mx-auto mb-3 sm:mb-4 flex items-center justify-center">
+                            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500" />
                           </div>
-                          <span className="text-gray-500 font-medium">
+                          <span className="text-gray-500 font-medium text-sm sm:text-base">
                             No image
                           </span>
                         </div>
@@ -151,17 +191,17 @@ export default async function ProductsPage({
                   </div>
 
                   {/* Product Info */}
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 mb-2">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex justify-between items-start mb-3 sm:mb-4">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 mb-2 truncate">
                           {product.name}
                         </h2>
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                          <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             ${product.price.toFixed(2)}
                           </span>
-                          <span className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+                          <span className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs font-medium px-2.5 py-1 sm:px-3 rounded-full w-fit">
                             {product.category?.name || "Uncategorized"}
                           </span>
                         </div>
@@ -169,10 +209,10 @@ export default async function ProductsPage({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-gray-100">
                       <Link
                         href={`/admin/products/${product._id}/edit`}
-                        className="group/edit flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                        className="group/edit flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm sm:text-base"
                       >
                         <Edit className="w-4 h-4 transition-transform group-hover/edit:scale-110" />
                         <span>Edit</span>
@@ -186,36 +226,42 @@ export default async function ProductsPage({
           )}
 
           {/* Pagination */}
-          <div className="flex justify-center items-center mt-16 gap-6">
-            {page <= 1 ? (
-              <span className="flex items-center gap-2 px-6 py-3 rounded-2xl text-gray-400 cursor-not-allowed bg-white/50 backdrop-blur-sm border border-gray-200">
-                <ChevronLeft className="w-5 h-5" />
-                <span className="font-medium">Previous</span>
-              </span>
-            ) : (
-              <Link
-                href={`/admin/products?page=${page - 1}${
-                  category ? `&category=${category}` : ""
-                }`}
-                className="group flex items-center gap-2 px-6 py-3 rounded-2xl text-gray-700 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                <span className="font-medium">Previous</span>
-              </Link>
-            )}
+          <div className="flex flex-row justify-center items-center mt-8 sm:mt-12 md:mt-16 gap-2 sm:gap-4 md:gap-6 px-2 sm:px-4">
+            {/* Previous Button */}
+            <div className="flex items-center">
+              {page <= 1 ? (
+                <span className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-lg sm:rounded-xl md:rounded-2xl text-gray-400 cursor-not-allowed bg-white/50 backdrop-blur-sm border border-gray-200 text-xs sm:text-sm md:text-base whitespace-nowrap">
+                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                  <span className="font-medium hidden xs:inline">Previous</span>
+                  <span className="font-medium xs:hidden">Prev</span>
+                </span>
+              ) : (
+                <Link
+                  href={`/admin/products?page=${page - 1}${
+                    category ? `&category=${category}` : ""
+                  }`}
+                  className="group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-lg sm:rounded-xl md:rounded-2xl text-gray-700 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs sm:text-sm md:text-base whitespace-nowrap"
+                >
+                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-transform group-hover:-translate-x-1" />
+                  <span className="font-medium hidden xs:inline">Previous</span>
+                  <span className="font-medium xs:hidden">Prev</span>
+                </Link>
+              )}
+            </div>
 
-            <div className="flex gap-3">
+            {/* Page Numbers */}
+            <div className="flex gap-1 sm:gap-2 md:gap-3">
               {page > 1 && (
                 <Link
                   href={`/admin/products?page=${page - 1}${
                     category ? `&category=${category}` : ""
                   }`}
-                  className="w-12 h-12 flex items-center justify-center rounded-2xl text-gray-600 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-110 shadow-lg"
+                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg sm:rounded-xl md:rounded-2xl text-gray-600 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-110 shadow-lg text-xs sm:text-sm md:text-base"
                 >
                   {page - 1}
                 </Link>
               )}
-              <span className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg shadow-blue-500/25">
+              <span className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg sm:rounded-xl md:rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg shadow-blue-500/25 text-xs sm:text-sm md:text-base">
                 {page}
               </span>
               {hasNextPage && (
@@ -223,29 +269,34 @@ export default async function ProductsPage({
                   href={`/admin/products?page=${page + 1}${
                     category ? `&category=${category}` : ""
                   }`}
-                  className="w-12 h-12 flex items-center justify-center rounded-2xl text-gray-600 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-110 shadow-lg"
+                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg sm:rounded-xl md:rounded-2xl text-gray-600 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-110 shadow-lg text-xs sm:text-sm md:text-base"
                 >
                   {page + 1}
                 </Link>
               )}
             </div>
 
-            {!hasNextPage ? (
-              <span className="flex items-center gap-2 px-6 py-3 rounded-2xl text-gray-400 cursor-not-allowed bg-white/50 backdrop-blur-sm border border-gray-200">
-                <span className="font-medium">Next</span>
-                <ChevronRight className="w-5 h-5" />
-              </span>
-            ) : (
-              <Link
-                href={`/admin/products?page=${page + 1}${
-                  category ? `&category=${category}` : ""
-                }`}
-                className="group flex items-center gap-2 px-6 py-3 rounded-2xl text-gray-700 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <span className="font-medium">Next</span>
-                <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-            )}
+            {/* Next Button */}
+            <div className="flex items-center">
+              {!hasNextPage ? (
+                <span className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-lg sm:rounded-xl md:rounded-2xl text-gray-400 cursor-not-allowed bg-white/50 backdrop-blur-sm border border-gray-200 text-xs sm:text-sm md:text-base whitespace-nowrap">
+                  <span className="font-medium hidden xs:inline">Next</span>
+                  <span className="font-medium xs:hidden">Next</span>
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                </span>
+              ) : (
+                <Link
+                  href={`/admin/products?page=${page + 1}${
+                    category ? `&category=${category}` : ""
+                  }`}
+                  className="group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-lg sm:rounded-xl md:rounded-2xl text-gray-700 hover:text-blue-600 bg-white/70 backdrop-blur-sm hover:bg-white border border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs sm:text-sm md:text-base whitespace-nowrap"
+                >
+                  <span className="font-medium hidden xs:inline">Next</span>
+                  <span className="font-medium xs:hidden">Next</span>
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

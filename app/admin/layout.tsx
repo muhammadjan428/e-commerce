@@ -5,7 +5,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div>
       <AdminNavbar />
-      <main className="p-4">{children}</main>
+      <main>{children}</main>
       <Toaster position="top-center" />
     </div>
   )

@@ -88,9 +88,9 @@ export default function AdminNavbar() {
           ))}
         </nav>
 
-        {/* User Actions */}
+        {/* User Actions - Fixed alignment */}
         <div className="flex items-center gap-3">
-          <motion.div whileHover={{ scale: 1.05 }}>
+          <div className="flex items-center justify-center w-8 h-8">
             <UserButton 
               afterSignOutUrl="/" 
               appearance={{
@@ -99,12 +99,12 @@ export default function AdminNavbar() {
                 }
               }}
             />
-          </motion.div>
+          </div>
           
           <Button 
             variant="ghost" 
             size="icon" 
-            className="lg:hidden rounded-full bg-gray-50 hover:bg-gray-100"
+            className="lg:hidden w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >

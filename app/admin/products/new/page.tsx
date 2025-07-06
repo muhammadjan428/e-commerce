@@ -5,7 +5,7 @@ export default async function NewProductPage() {
   const categories = await getAllCategories();
 
   return (
-    <div className="p-6">
+    <div>
       <ProductForm categories={categories} />
     </div>
   );
