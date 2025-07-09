@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Minus, Plus, Trash2, Heart, ShoppingCart, AlertCircle } from 'lucide-react';
-import { CartItem as CartItemType } from '@/cart/cartt';
+import { Minus, Plus, Trash2, ShoppingCart, AlertCircle } from 'lucide-react';
+import { CartItem as CartItemType } from '@/cart/cart';
 import { updateCartItem, removeFromCart } from '@/lib/actions/cart.actions';
 
 interface CartItemProps {

@@ -7,14 +7,10 @@ import { Heart, ShoppingCart, ArrowLeft, Sparkles, Star, Calendar, Tag } from "l
 import WishlistButton from "@/components/WishlistButton";
 import AddToCartButton from "@/components/AddToCartButton";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import Loading from "@/components/shared/Loading";
+import { Suspense } from "react";
 
-export default async function WishlistPage() {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
+async function WishlistContent() {
   const wishlistItems = await getWishlistItems();
 
   return (
@@ -209,5 +205,19 @@ export default async function WishlistPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default async function WishlistPage() {
+  const { userId } = await auth();
+  
+  if (!userId) {
+    redirect('/sign-in');
+  }
+
+  return (
+    <Suspense fallback={<Loading message="Loading your wishlist..." />}>
+      <WishlistContent />
+    </Suspense>
   );
 }

@@ -14,7 +14,7 @@ interface UserData {
   isAdmin?: boolean;
 }
 
-const ADMIN_EMAILS = ['mjan23925@gmail.com', 'admin@example.com'];
+const ADMIN_EMAILS = ['mjan23925@gmail.com', 'muhammadjanfullstack@gmail.com'];
 
 export const getAllUsers = async () => {
   try {

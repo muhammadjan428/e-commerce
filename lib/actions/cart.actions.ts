@@ -5,7 +5,7 @@ import { connectToDatabase } from '@/lib/mongoose';
 import { Cart } from '../models/cart.model';
 import Product from '../models/product.model';
 import { revalidatePath } from 'next/cache';
-import { AddToCartData, CartItem, CartSummary, UpdateCartData } from '@/cart/cartt';
+import { AddToCartData, CartItem, CartSummary, UpdateCartData } from '@/cart/cart';
 
 
 // Get current user's cart items

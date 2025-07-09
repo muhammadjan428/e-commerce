@@ -48,19 +48,21 @@ const SettingsSchema = new Schema<ISettings>(
       required: true,
       trim: true,
       lowercase: true,
-      default: 'contact@store.com',
+      default: 'muhammadjanfullstack@gmail.com',
       match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'],
     },
     contactPhone: {
       type: String,
       required: true,
       trim: true,
-      default: '+1-234-567-8900',
+      default: '+92-348-096-7184',
     },
     socialMedia: {
+
       facebook: {
         type: String,
         trim: true,
+        default: 'https://www.facebook.com/syedmuhammad.jan.79',
         validate: {
           validator: function(v: string) {
             return !v || /^https?:\/\/(www\.)?facebook\.com\//.test(v);
@@ -71,6 +73,7 @@ const SettingsSchema = new Schema<ISettings>(
       twitter: {
         type: String,
         trim: true,
+        default: 'https://x.com/Muhammad_Jan11',
         validate: {
           validator: function(v: string) {
             return !v || /^https?:\/\/(www\.)?twitter\.com\//.test(v) || /^https?:\/\/(www\.)?x\.com\//.test(v);
@@ -81,6 +84,7 @@ const SettingsSchema = new Schema<ISettings>(
       instagram: {
         type: String,
         trim: true,
+        default: 'https://www.instagram.com/syedmuhammadjan/',
         validate: {
           validator: function(v: string) {
             return !v || /^https?:\/\/(www\.)?instagram\.com\//.test(v);
@@ -91,6 +95,7 @@ const SettingsSchema = new Schema<ISettings>(
       linkedin: {
         type: String,
         trim: true,
+        default: 'https://www.linkedin.com/in/muhammad-jan-b247092a0/',
         validate: {
           validator: function(v: string) {
             return !v || /^https?:\/\/(www\.)?linkedin\.com\//.test(v);

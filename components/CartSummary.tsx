@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, Trash2, Sparkles, Star, Shield } from 'lucide-react';
-import { CartSummary as CartSummaryType } from '@/cart/cartt';
+import { CartSummary as CartSummaryType } from '@/cart/cart';
 import { clearCart } from '@/lib/actions/cart.actions';
 import { getPublicSettings } from '@/lib/actions/settings.actions';
 

@@ -15,10 +15,10 @@ export interface DailyRevenueData {
 export async function getDailyRevenue(): Promise<DailyRevenueData[]> {
   try {
     // Check if current user is admin
-    const isAdminUser = await checkIsAdmin();
-    if (!isAdminUser) {
-      throw new Error('Unauthorized: Admin access required');
-    }
+    // const isAdminUser = await checkIsAdmin();
+    // if (!isAdminUser) {
+    //   throw new Error('Unauthorized: Admin access required');
+    // }
 
     await connectToDatabase();
 
@@ -80,10 +80,10 @@ export interface CustomerData {
 export async function getAllCustomers(): Promise<CustomerData[]> {
   try {
     // Check if current user is admin
-    const isAdminUser = await checkIsAdmin();
-    if (!isAdminUser) {
-      throw new Error('Unauthorized: Admin access required');
-    }
+    // const isAdminUser = await checkIsAdmin();
+    // if (!isAdminUser) {
+    //   throw new Error('Unauthorized: Admin access required');
+    // }
 
     await connectToDatabase();
 
@@ -133,10 +133,10 @@ export async function getAllCustomers(): Promise<CustomerData[]> {
 
 export async function getCustomerDetails(clerkId: string) {
   try {
-    const isAdminUser = await checkIsAdmin();
-    if (!isAdminUser) {
-      throw new Error('Unauthorized: Admin access required');
-    }
+    // const isAdminUser = await checkIsAdmin();
+    // if (!isAdminUser) {
+    //   throw new Error('Unauthorized: Admin access required');
+    // }
 
     await connectToDatabase();
 

@@ -54,9 +54,14 @@ export default async function Products({
     freeShippingThreshold: 50,
     maintenanceMode: false,
     maxCartItems: 50,
-    contactEmail: "contact@store.com",
-    contactPhone: "+1-234-567-8900",
-    socialMedia: {},
+    contactEmail: "muhammadjanfullstack@gmail.com",
+    contactPhone: "+92-348-096-7184",
+    socialMedia: {
+        facebook: 'https://www.facebook.com/syedmuhammad.jan.79',
+        twitter: 'https://x.com/Muhammad_Jan11',
+        instagram: 'https://www.instagram.com/syedmuhammadjan/',
+        linkedin: 'https://www.linkedin.com/in/muhammad-jan-b247092a0/'
+      },
     emailSettings: {
       orderConfirmation: true,
       shippingUpdates: true,

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import '../globals.css'
 import Navbar from '@/components/shared/Navbar'
 import { CartProvider } from '@/components/cart/context'
+import DeletedNavbar from '@/components/shared/DeletedNavbar'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -21,17 +22,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-      <html lang="en">
+    <div className={`${geistSans.variable} ${geistMono.variable}`}>
       <CartProvider>
-      <body>
         <Navbar />
         {children}
-        </body>
-    </CartProvider>
-      </html>
+      </CartProvider>
+    </div>
   )
 }

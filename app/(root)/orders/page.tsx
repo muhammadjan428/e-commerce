@@ -172,7 +172,7 @@ export default function OrdersPage() {
             Continue Shopping
           </button>
           <button
-            onClick={() => window.location.href = '/account/orders'}
+            onClick={() => window.location.href = '/purchases'}
             className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-8 rounded-lg transition"
           >
             View All Orders

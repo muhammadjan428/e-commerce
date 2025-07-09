@@ -30,8 +30,6 @@ export interface SettingsType {
   updatedAt: string;
 }
 
-
-
 // Get current settings
 export const getSettings = async (): Promise<SettingsType | null> => {
   try {
@@ -48,9 +46,14 @@ export const getSettings = async (): Promise<SettingsType | null> => {
         freeShippingThreshold: 50,
         maintenanceMode: false,
         maxCartItems: 50,
-        contactEmail: 'contact@store.com',
-        contactPhone: '+1-234-567-8900',
-        socialMedia: {},
+        contactEmail: 'muhammadjanfullstack@gmail.com',
+        contactPhone: '+92-348-096-7184',
+        socialMedia: {
+          facebook: 'https://www.facebook.com/syedmuhammad.jan.79',
+          twitter: 'https://x.com/Muhammad_Jan11',
+          instagram: 'https://www.instagram.com/syedmuhammadjan/',
+          linkedin: 'https://www.linkedin.com/in/muhammad-jan-b247092a0/'
+        },
         emailSettings: {
           orderConfirmation: true,
           shippingUpdates: true,
@@ -105,6 +108,8 @@ export const updateSettings = async (settingsData: Partial<SettingsType>) => {
     // Remove _id and timestamps from update data
     const { _id, createdAt, updatedAt, ...updateData } = settingsData;
 
+    console.log('Updating settings with data:', updateData);
+
     const settings = await Settings.findOneAndUpdate(
       {}, // Find any settings document (should be only one)
       { $set: updateData },
@@ -114,6 +119,8 @@ export const updateSettings = async (settingsData: Partial<SettingsType>) => {
         runValidators: true 
       }
     );
+
+    console.log('Settings updated successfully:', settings);
 
     revalidatePath('/admin/settings');
     revalidatePath('/');
@@ -129,47 +136,53 @@ export const updateSettings = async (settingsData: Partial<SettingsType>) => {
     };
   } catch (error) {
     console.error('Error updating settings:', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to update settings');
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to update settings'
+    };
   }
 };
 
 // Get public settings (for frontend use)
-// Get public settings (for frontend use)
 export const getPublicSettings = async () => {
-    try {
-      await connectToDatabase();
-  
-      const settings = await Settings.findOne().select(
-        'taxRate shippingRate freeShippingThresholdy contactEmail contactPhone socialMedia'
-      ).lean() as any;
-  
-      if (!settings) {
-        return {
-          taxRate: 8.5,
-          shippingRate: 5.99,
-          freeShippingThreshold: 50,
-          maxCartItems: 50,
-          contactEmail: 'contact@store.com',
-          contactPhone: '+1-234-567-8900',
-          socialMedia: {},
-        };
-      }
-  
-      return {
-        taxRate: settings.taxRate,
-        shippingRate: settings.shippingRate,
-        freeShippingThreshold: settings.freeShippingThreshold,
-        maxCartItems: settings.maxCartItems,
-        contactEmail: settings.contactEmail,
-        contactPhone: settings.contactPhone,
-        socialMedia: settings.socialMedia || {},
-      };
-    } catch (error) {
-      console.error('Error fetching public settings:', error);
-      return null;
-    }
-  };
+  try {
+    await connectToDatabase();
 
+    const settings = await Settings.findOne().select(
+      'taxRate shippingRate freeShippingThreshold maxCartItems contactEmail contactPhone socialMedia'
+    ).lean() as any;
+
+    if (!settings) {
+      return {
+        taxRate: 8.5,
+        shippingRate: 5.99,
+        freeShippingThreshold: 50,
+        maxCartItems: 50,
+        contactEmail: 'muhammadjanfullstack@gmail.com',
+        contactPhone: '+92-348-096-7184',
+        socialMedia: {
+          facebook: 'https://www.facebook.com/syedmuhammad.jan.79',
+          twitter: 'https://x.com/Muhammad_Jan11',
+          instagram: 'https://www.instagram.com/syedmuhammadjan/',
+          linkedin: 'https://www.linkedin.com/in/muhammad-jan-b247092a0/'
+        },
+      };
+    }
+
+    return {
+      taxRate: settings.taxRate,
+      shippingRate: settings.shippingRate,
+      freeShippingThreshold: settings.freeShippingThreshold,
+      maxCartItems: settings.maxCartItems,
+      contactEmail: settings.contactEmail,
+      contactPhone: settings.contactPhone,
+      socialMedia: settings.socialMedia || {},
+    };
+  } catch (error) {
+    console.error('Error fetching public settings:', error);
+    return null;
+  }
+};
 
 // Reset settings to default (Admin only)
 export const resetSettings = async () => {
@@ -207,11 +220,13 @@ export const resetSettings = async () => {
       },
     };
 
-    await Settings.findOneAndUpdate(
+    const settings = await Settings.findOneAndUpdate(
       {},
       { $set: defaultSettings },
-      { upsert: true }
+      { upsert: true, new: true }
     );
+
+    console.log('Settings reset successfully:', settings);
 
     revalidatePath('/admin/settings');
     revalidatePath('/');
@@ -222,6 +237,9 @@ export const resetSettings = async () => {
     };
   } catch (error) {
     console.error('Error resetting settings:', error);
-    throw new Error('Failed to reset settings');
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to reset settings'
+    };
   }
 };
