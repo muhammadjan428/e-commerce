@@ -73,61 +73,6 @@ export default function NotFound() {
                 <span className="relative text-sm sm:text-base">Go Back</span>
               </button>
             </div>
-
-            {/* Search Section */}
-            <div className="pt-6 sm:pt-8 border-t border-gray-200">
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 justify-center">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Search className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-                  Try Searching Instead
-                </h3>
-              </div>
-              
-              <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-                Search for products, categories, or anything you're looking for:
-              </p>
-              
-              <div className="relative max-w-md mx-auto">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={handleSearch}
-                  placeholder="Search products..."
-                  className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl sm:rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-lg text-sm sm:text-base"
-                />
-                <button
-                  onClick={() => {
-                    if (searchQuery.trim()) {
-                      window.location.href = `/?q=${encodeURIComponent(searchQuery.trim())}`;
-                    }
-                  }}
-                  className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
-                >
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
-              </div>
-              
-              {/* Quick Links */}
-              <div className="mt-6 sm:mt-8">
-                <p className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">
-                  Popular searches:
-                </p>
-                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
-                  {['Electronics', 'Clothing', 'Home & Garden', 'Books'].map((category) => (
-                    <Link
-                      key={category}
-                      href={`/?q=${encodeURIComponent(category)}`}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 hover:from-blue-100 hover:to-purple-100 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 transform hover:scale-105"
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

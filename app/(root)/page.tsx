@@ -11,6 +11,8 @@ import {
   Sparkles,
   Star,
   Search,
+  ArrowRight,
+  Settings,
 } from "lucide-react";
 import AddToCartButton from "@/components/AddToCartButton";
 import WishlistButton from "@/components/WishlistButton";
@@ -96,6 +98,21 @@ export default async function Products({
 
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto">
+
+           <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
+            <div className="flex justify-end mb-4 sm:mb-6">
+              <Link
+                href="/admin"
+                className="group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-white/20"
+              >
+                <Settings className="w-4 h-4 transition-transform group-hover:rotate-180 duration-300" />
+                <span className="font-medium hidden sm:inline">Admin Dashboard</span>
+                <span className="font-medium sm:hidden">Admin</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" />
+              </Link>
+            </div>
+          </div>
+
           {/* Billboard Section - Hide when searching */}
           {!searchQuery && (
             <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
@@ -105,6 +122,9 @@ export default async function Products({
               />
             </div>
           )}
+
+          {/* Admin Dashboard Button - Top Right after Billboard */}
+         
 
           <div className="px-3 sm:px-4 md:px-6 pb-6">
             {/* Header Section */}
